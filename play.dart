@@ -1,26 +1,18 @@
-import 'dart:io';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:http/io_client.dart';
-
-class Ok {
-  final String msg;
-  Ok(String host, {this.msg = ""});
-}
-
-bool _certificateCheck(X509Certificate cert, String host, int port) => true;
-
-http.Client getClient() {
-  var ioClient = new HttpClient();
-  ioClient.badCertificateCallback = _certificateCheck;
-  return IOClient(ioClient);
-}
+import 'package:dart_unifi/unifi.dart';
 
 const host = "10.0.245.39";
+const username = 'wifi';
+const password = "WifiWifi9";
+
+Future<void> run() async {
+  UnifiController controller = UnifiController(host,
+      username: username, password: password, ignoreBadCert: true);
+  await controller.login();
+  controller.events.onData((dynamic message) {
+    print(message);
+  }).listen();
+}
 
 void main() {
-  http.Client client = getClient();
-  client.get(Uri.https(host, "")).then((http.Response r) {
-    print(r.body);
-  });
+  run().then((v) {});
 }

@@ -7,7 +7,8 @@ const password = "WifiWifi9";
 void main() {
   UnifiController controller;
   setUp(() async {
-    controller = UnifiController(host, username: username, password: password);
+    controller = UnifiController(host,
+        username: username, password: password, ignoreBadCert: true);
   });
   tearDown(() async {});
   test("auth", () async {

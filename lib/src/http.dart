@@ -11,9 +11,9 @@ enum Method { post, get }
 class Client {
   http.Client _client;
 
-  Client() {
+  Client({bool ignoreBadCert}) {
     var ioClient = new HttpClient();
-    ioClient.badCertificateCallback = (_, __, ___) => true;
+    if (ignoreBadCert) ioClient.badCertificateCallback = (_, __, ___) => true;
     _client = IOClient(ioClient);
   }
 
