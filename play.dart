@@ -1,18 +1,7 @@
-import 'package:dart_unifi/unifi.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 
-const host = "10.0.245.39";
-const username = 'wifi';
-const password = "WifiWifi9";
-
-Future<void> run() async {
-  UnifiController controller = UnifiController(host,
-      username: username, password: password, ignoreBadCert: true);
-  await controller.login();
-  controller.events.onData((dynamic message) {
-    print(message);
-  }).listen();
-}
+const epHotspot = 'cmd/%site%/hotspot';
 
 void main() {
-  run().then((v) {});
+  print(epHotspot.replaceAll('%site%', 'ok'));
 }

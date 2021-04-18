@@ -1,4 +1,4 @@
-name: dart_unifi
+name: flutter_unifi
 description: >-
   A Dart implementation that provides access to Unifi Controllers API 6.x and later.
 homepage: https://github.com/kacao/dart-unifi
@@ -8,3 +8,5 @@ dependencies:
   http: ^0.13.1
   logging: ^1.0.1
   test: ^1.16.8
+dev_dependencies: 
+  dotenv: ^3.0.0-nullsafety.0

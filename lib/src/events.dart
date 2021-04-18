@@ -3,6 +3,8 @@ import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/io.dart';
 import './controller.dart';
 
+const epWebsocket = 'wss/s/%site%/events';
+
 class Events {
   UnifiController _controller;
   IOWebSocketChannel _events;
@@ -10,11 +12,14 @@ class Events {
   Function _onDone;
   Function(Object error) _onError;
 
-  Events(this._controller) {}
+  Events(this._controller);
 
   listen() {
-    _events = IOWebSocketChannel.connect(_controller.websocketUrl,
-        headers: _controller.getHeaders());
+    var url = Uri(scheme: "wss", host: _controller.host, port: _controller.port)
+        .resolve(epBase)
+        .resolve(epWebsocket);
+    _events =
+        IOWebSocketChannel.connect(url, headers: _controller.getHeaders());
     _events.stream.listen(_onData, onError: _onError, onDone: _onDone);
   }
 

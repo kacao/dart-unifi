@@ -21,7 +21,7 @@ class Client {
       {Method method: Method.get,
       Map<String, String> headers,
       Map<String, dynamic> payloads}) async {
-    String body = null;
+    String body;
     if (payloads != null) {
       body = jsonEncode(payloads);
     }
@@ -44,15 +44,13 @@ class Client {
   }
 
   Future<http.Response> get(Uri url,
-      {Map<String, String> headers: null,
-      Map<String, dynamic> payloads: null}) async {
+      {Map<String, String> headers, Map<String, dynamic> payloads}) async {
     return await fetch(url,
         method: Method.get, headers: headers, payloads: payloads);
   }
 
   Future<http.Response> post(Uri url,
-      {Map<String, String> headers: null,
-      Map<String, dynamic> payloads: null}) async {
+      {Map<String, String> headers, Map<String, dynamic> payloads}) async {
     return await fetch(url,
         method: Method.post, headers: headers, payloads: payloads);
   }

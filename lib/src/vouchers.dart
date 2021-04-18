@@ -1,23 +1,16 @@
-import 'dart:html';
-
-import 'package:dart_unifi/src/http.dart';
-
 import './controller.dart';
 import 'package:http/http.dart' as http;
 
-const epHotspot = 'cmd/hotspot';
-const epStaVoucher = 'stat/voucher';
+const epHotspot = 'api/s/%site%/cmd/hotspot';
+const epStaVoucher = '/api/s/%site%/stat/voucher';
 
 const cmdCreateVoucher = 'create-voucher';
 const cmdDeleteVoucher = 'delete-voucher';
 
 class Vouchers {
   UnifiController _controller;
-  Uri _urlHotspot;
 
-  Vouchers(this._controller) {
-    _urlHotspot = _controller.baseUrl.resolve(epHotspot);
-  }
+  Vouchers(this._controller);
 
   ///
   /// [minutes]: number of valid minutes after activation
@@ -53,13 +46,13 @@ class Vouchers {
   /// Returns a list of vouchers since [createTime]
   ///
   Future<http.Response> list({int createTime}) async {
-    const payloads = {};
+    Map<String, dynamic> payloads = {};
     if (createTime != null) payloads['create_time'] = createTime;
     return await _controller.post(epStaVoucher, payloads);
   }
 
   ///
-  /// Returns true when successfully delete a voucher
+  /// Delete a voucher with [id] and return true
   ///
   Future<http.Response> revoke(String id) async {
     var payloads = {'_id': id};
