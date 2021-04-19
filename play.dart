@@ -1,7 +1,13 @@
 import 'package:dotenv/dotenv.dart' as dotenv;
+import 'package:path/path.dart' as path;
 
-const epHotspot = 'cmd/%site%/hotspot';
+const epBase = 'proxy/network/';
+const endpoint = 'api/s/default/sta/voucher';
 
 void main() {
-  print(epHotspot.replaceAll('%site%', 'ok'));
+  var p = path.join(epBase, endpoint);
+  print(p);
+  Uri uri = Uri(host: '10.0.245.39');
+  print('uri: $uri');
+  print(uri.resolve(p));
 }

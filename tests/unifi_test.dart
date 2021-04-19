@@ -9,7 +9,7 @@ void main() {
   UnifiController controller;
   setUp(() async {
     print('setting up');
-    load('.test.local.eastvale');
+    load('.env.test.local.eastvale');
     print(Directory.current);
     final host = env['UNIFI_HOST'];
     final port = env['UNIFI_PORT'];
@@ -31,7 +31,7 @@ void main() {
   });
   test('vouchers', () async {
     var res = await controller.vouchers.list();
-    print(res.statusCode);
-    print(res.body);
+    expect(res.statusCode, equals(HttpStatus.ok));
+    expect(res.body.meta.rc, equals('ok'));
   });
 }

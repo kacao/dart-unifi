@@ -6,6 +6,7 @@ import './http.dart';
 import './exceptions.dart';
 import './events.dart';
 import './vouchers.dart';
+import 'package:path/path.dart' as path;
 
 // endpoints
 const epBase = 'proxy/network/';
@@ -42,12 +43,11 @@ class UnifiController {
       this.password: "",
       this.siteId,
       bool ignoreBadCert: false}) {
-    _baseUrl = Uri.https('$host:$port', "");
-    _url = _baseUrl.resolve(epBase);
-    print('base $_baseUrl');
+    _url = Uri.https('$host:$port', "");
     print('url $_url');
-    _urlLogin = _baseUrl.resolve(epLogin);
-    _urlLogout = _baseUrl.resolve(epLogout);
+    _urlLogin = _url.resolve(epLogin);
+    _urlLogout = _url.resolve(epLogout);
+    print('login: $_urlLogin, logout: $_urlLogout');
 
     _client = Client(ignoreBadCert: ignoreBadCert);
 
@@ -75,14 +75,11 @@ class UnifiController {
     Uri url;
 
     if (endpoint.contains("login") | (endpoint.contains("logout"))) {
-      url = _baseUrl.resolve(endpoint);
+      url = _url.resolve(endpoint);
     } else {
       if (siteId != null) sid = siteId;
       if (sid != null) endpoint = endpoint.replaceAll('%site%', sid);
-      print('endpoint: $endpoint');
-      print('resolving $_url with $endpoint');
-      url = _url.resolve(endpoint);
-      print('tada $url');
+      url = _url.resolve(path.join(epBase, endpoint));
     }
 
     final headers = getHeaders();
@@ -109,7 +106,7 @@ class UnifiController {
 
   Future<bool> login() async {
     // obtain csrf token
-    var res = await _client.get(_baseUrl);
+    var res = await _client.get(_url);
     this._csrfToken = res.headers['x-csrf-token'];
 
     final Map<String, String> payloads = {
