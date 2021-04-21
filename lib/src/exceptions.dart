@@ -8,10 +8,11 @@ class RequestException implements Exception {
 }
 
 class ApiException implements Exception {
+  final int statusCode;
   final String message;
-  ApiException(this.message);
+  ApiException(this.statusCode, this.message);
 
   toString() {
-    return 'Unifi Controller API Exception: $message';
+    return 'Unifi Controller API Exception: [$statusCode] $message';
   }
 }

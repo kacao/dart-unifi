@@ -21,7 +21,7 @@ class Vouchers {
   /// [down]: download speed in kbps
   /// [megabytes]: data transfer limit in mb
   ///
-  /// Returns
+  /// Returns [create_time]
   ///
   Future<http.Response> create(int minutes,
       {int count: 1,
@@ -39,13 +39,14 @@ class Vouchers {
     if (up != null) payloads['up'] = up;
     if (down != null) payloads['down'] = down;
     if (megabytes != null) payloads['megabytes'] = megabytes;
-    return await _controller.post(epHotspot, payloads);
+    final res = await _controller.post(epHotspot, payloads);
+    return res[0]['create_time'];
   }
 
   ///
   /// Returns a list of vouchers since [createTime]
   ///
-  Future<http.Response> list({int createTime}) async {
+  Future<List<dynamic>> list({int createTime}) async {
     Map<String, dynamic> payloads = {};
     if (createTime != null) payloads['create_time'] = createTime;
     return await _controller.post(epStaVoucher, payloads);
@@ -54,8 +55,9 @@ class Vouchers {
   ///
   /// Delete a voucher with [id] and return true
   ///
-  Future<http.Response> revoke(String id) async {
+  Future<void> revoke(String id) async {
     var payloads = {'_id': id};
-    return await _controller.post(epHotspot, payloads);
+    await _controller.post(epHotspot, payloads);
+    return true;
   }
 }

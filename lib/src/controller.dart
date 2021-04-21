@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:http/http.dart' as http;
 import './http.dart';
@@ -59,13 +60,13 @@ class UnifiController {
     //});
   }
 
-  Future<http.Response> post(String endpoint, Map<String, dynamic> payloads,
+  Future<dynamic> post(String endpoint, Map<String, dynamic> payloads,
       {String siteId, bool authenticate: true}) async {
     return await fetch(endpoint,
         method: Method.post, siteId: siteId, authenticate: authenticate);
   }
 
-  Future<http.Response> fetch(String endpoint,
+  Future<dynamic> fetch(String endpoint,
       {Method method: Method.get,
       Map<String, dynamic> payloads,
       String siteId,
@@ -101,7 +102,10 @@ class UnifiController {
         throw RequestException("Unable to login");
       }
     }
-    return res;
+    if (res.statusCode == HttpStatus.ok) {
+      return jsonDecode(res.body)['data'];
+    }
+    throw ApiException(res.statusCode, jsonDecode(res.body)['rc']);
   }
 
   Future<bool> login() async {
