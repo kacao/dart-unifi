@@ -27,7 +27,6 @@ class Client {
     }
 
     http.Response res;
-    print('fetching $url');
     switch (method) {
       case Method.post:
         {

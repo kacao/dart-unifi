@@ -1,5 +1,4 @@
 import './controller.dart';
-import 'package:http/http.dart' as http;
 
 const epHotspot = 'api/s/%site%/cmd/hotspot';
 const epStaVoucher = 'api/s/%site%/stat/voucher';
@@ -23,7 +22,7 @@ class Vouchers {
   ///
   /// Returns [create_time]
   ///
-  Future<http.Response> create(int minutes,
+  Future<int> create(int minutes,
       {int count: 1,
       int quota: 1,
       int up,

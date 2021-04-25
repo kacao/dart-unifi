@@ -7,6 +7,7 @@ import './http.dart';
 import './exceptions.dart';
 import './events.dart';
 import './vouchers.dart';
+import './guests.dart';
 import 'package:path/path.dart' as path;
 
 // endpoints
@@ -21,6 +22,7 @@ class UnifiController {
 
   Events _events;
   Vouchers _vouchers;
+  Guests _guests;
 
   final int port;
   bool _authenticated = false;
@@ -37,6 +39,7 @@ class UnifiController {
 
   get events => _events;
   get vouchers => _vouchers;
+  get guests => _guests;
 
   UnifiController(this.host,
       {this.port: 443,
@@ -45,15 +48,15 @@ class UnifiController {
       this.siteId,
       bool ignoreBadCert: false}) {
     _url = Uri.https('$host:$port', "");
-    print('url $_url');
     _urlLogin = _url.resolve(epLogin);
     _urlLogout = _url.resolve(epLogout);
-    print('login: $_urlLogin, logout: $_urlLogout');
 
     _client = Client(ignoreBadCert: ignoreBadCert);
 
     _events = Events(this);
     _vouchers = Vouchers(this);
+    _guests = Guests(this);
+
     //log.level = Level.ALL;
     //log.onRecord.listen((record) {
     //  print('${record.level.name}: ${record.time}: ${record.message}');
