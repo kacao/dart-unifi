@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
-import 'package:logging/logging.dart';
-import 'package:http/http.dart' as http;
+//import 'package:logging/logging.dart';
 import './http.dart';
 import './exceptions.dart';
-import './events.dart';
+//import './events.dart';
 import './vouchers.dart';
 import './guests.dart';
 import 'package:path/path.dart' as path;
@@ -22,7 +21,7 @@ class UnifiController {
   Uri _baseUrl, _url, _urlLogin, _urlLogout, _urlWebsocket;
   String _csrfToken;
 
-  Events _events;
+  //Events _events;
   Vouchers _vouchers;
   Guests _guests;
 
@@ -39,7 +38,7 @@ class UnifiController {
 
   get baseUrl => _baseUrl;
 
-  get events => _events;
+  //get events => _events;
   get vouchers => _vouchers;
   get guests => _guests;
 
@@ -55,7 +54,7 @@ class UnifiController {
 
     _client = Client(ignoreBadCert: ignoreBadCert);
 
-    _events = Events(this);
+    //_events = Events(this);
     _vouchers = Vouchers(this);
     _guests = Guests(this);
 
