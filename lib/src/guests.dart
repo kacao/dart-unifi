@@ -1,6 +1,6 @@
 import 'controller.dart';
 
-const epStaMgr = 'api/s/%site%/stat/mgr';
+const epStaMgr = 'api/s/%site%/cmd/stamgr';
 
 const cmdAuthorize = 'authorize-guest';
 const cmdUnauthorize = 'unauthorize-guest';

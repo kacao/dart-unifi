@@ -66,7 +66,10 @@ class UnifiController {
   Future<dynamic> post(String endpoint, Map<String, dynamic> payloads,
       {String siteId, bool authenticate: true}) async {
     return await fetch(endpoint,
-        method: Method.post, siteId: siteId, authenticate: authenticate);
+        payloads: payloads,
+        method: Method.post,
+        siteId: siteId,
+        authenticate: authenticate);
   }
 
   Future<dynamic> fetch(String endpoint,
@@ -85,16 +88,15 @@ class UnifiController {
       if (sid != null) endpoint = endpoint.replaceAll('%site%', sid);
       url = _url.resolve(path.join(epBase, endpoint));
     }
-
+    /*print('---');
+    print('fetching $url');
+    print(payloads);
+    print('---');*/
     final headers = getHeaders();
     var res = await _client.fetch(url,
         method: method, headers: headers, payloads: payloads);
-    this._csrfToken = res.headers['x-csrf-token'];
 
-    if (res.headers['Set-Cookie'] != null)
-      jar = Cookie.fromSetCookieValue(res.headers['Set-Cookie']);
-
-    if ((res.statusCode == HttpStatus.unauthorized) && (authenticate)) {
+    if ((res.statusCode == HttpStatus.forbidden) && (authenticate)) {
       if (await login()) {
         return fetch(endpoint,
             method: method,
@@ -105,17 +107,30 @@ class UnifiController {
         throw RequestException("Unable to login");
       }
     }
+
     if (res.statusCode == HttpStatus.ok) {
+      this._csrfToken = res.headers['x-csrf-token'];
+
+      if (res.headers['Set-Cookie'] != null)
+        jar = Cookie.fromSetCookieValue(res.headers['Set-Cookie']);
       return jsonDecode(res.body)['data'];
     }
-    throw ApiException(res.statusCode, jsonDecode(res.body)['rc']);
+    print('error');
+    print(payloads);
+    print(headers);
+    var msg = '';
+    try {
+      msg = jsonDecode(res.body).toString();
+    } on Exception {
+      msg = res.body;
+    }
+    throw ApiException(res.statusCode, msg);
   }
 
   Future<bool> login() async {
     // obtain csrf token
     var res = await _client.get(_url);
     this._csrfToken = res.headers['x-csrf-token'];
-
     final Map<String, String> payloads = {
       'username': username,
       'password': password
@@ -130,7 +145,6 @@ class UnifiController {
       _authenticated = true;
       return true;
     }
-    print(res.body);
     return false;
     //log.info("Log in successful.");
   }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_unifi/unifi.dart';
+import 'package:dart_unifi/unifi.dart';
 import 'package:test/test.dart';
 import 'dart:io';
 import 'package:dotenv/dotenv.dart' show load, env;
@@ -27,15 +27,19 @@ void main() {
     expect(await controller.login(), equals(true));
     expect(await controller.logout(), equals(true));
   });
-  group('vouchers', () async {
+  group('vouchers', () {
     test('list', () async {
       await controller.vouchers.list();
     });
   });
-  group('guests', () async {
+  group('guests', () {
     test('authorize', () async {
-      const mac = 'fa:fa:fa:fa:fa:fa';
+      const mac = '00:15:5d:07:cc:14';
       await controller.guests.authorize(mac, 286);
+    });
+    test('unauthorize', () async {
+      const mac = '00:15:5d:07:cc:14';
+      //await controller.guests.authorize(mac, 286);
       await controller.guests.unauthorize(mac);
     });
   });
