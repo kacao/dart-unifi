@@ -10,6 +10,8 @@ import './vouchers.dart';
 import './guests.dart';
 import 'package:path/path.dart' as path;
 
+const siteDefault = 'default';
+
 // endpoints
 const epBase = 'proxy/network/';
 const epLogin = 'api/auth/login';
@@ -45,7 +47,7 @@ class UnifiController {
       {this.port: 443,
       this.username: "",
       this.password: "",
-      this.siteId,
+      this.siteId: siteDefault,
       bool ignoreBadCert: false}) {
     _url = Uri.https('$host:$port', "");
     _urlLogin = _url.resolve(epLogin);
@@ -115,9 +117,11 @@ class UnifiController {
         jar = Cookie.fromSetCookieValue(res.headers['Set-Cookie']);
       return jsonDecode(res.body)['data'];
     }
+    /*
     print('error');
     print(payloads);
     print(headers);
+    */
     var msg = '';
     try {
       msg = jsonDecode(res.body).toString();
