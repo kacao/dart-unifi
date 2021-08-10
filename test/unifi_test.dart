@@ -10,7 +10,7 @@ import 'package:dotenv/dotenv.dart' show load, env;
 void main() {
   UnifiController controller;
   setUp(() async {
-    load('.env.test.local.lomavista');
+    load('.env.test.local.eastvale');
     final host = env['UNIFI_HOST'];
     final port = env['UNIFI_PORT'];
     final username = env['UNIFI_USERNAME'];
@@ -41,6 +41,11 @@ void main() {
       const mac = '00:15:5d:07:cc:14';
       //await controller.guests.authorize(mac, 286);
       await controller.guests.unauthorize(mac);
+    });
+  });
+  group('vouchers', () {
+    test('listVouchers', () async {
+      await controller.vouchers.list();
     });
   });
 }
