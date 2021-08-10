@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:dart_unifi/unifi.dart';
+import '../lib/unifi.dart';
 import 'package:test/test.dart';
 import 'dart:io';
 import 'package:dotenv/dotenv.dart' show load, env;

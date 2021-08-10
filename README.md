@@ -1,11 +1,11 @@
-# dart-unifi
+# unifi
 Unifi Controller API for Dart
 
 ### Installation
 
 ### Usage
 ```
-import 'package:dart_unifi/unifi.dart';
+import 'package:unifi/unifi.dart';
 
 controller = UnifiController(host, port: port, username: username, password: password, siteId: siteId);
 
