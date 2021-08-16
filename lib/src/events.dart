@@ -1,45 +1,86 @@
-/*import 'package:web_socket_channel/web_socket_channel.dart';
+import 'dart:async';
+import 'dart:io';
+
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/io.dart';
 import './controller.dart';
+
+enum EventType {
+  connecting,
+  connected,
+  disconnected,
+  reconnecting,
+  data,
+  error,
+  closing
+}
 
 const epWebsocket = 'wss/s/%site%/events';
 
 class Events {
   UnifiController _controller;
-  IOWebSocketChannel _events;
-  Function(dynamic message) _onData;
-  Function _onDone;
-  Function(Object error) _onError;
+  StreamController _streamController = new StreamController.broadcast();
+  IOWebSocketChannel _channel;
+  WebSocket _ws;
+  Stream get stream => _streamController.stream;
+  Uri _url;
 
-  Events(this._controller);
+  bool _closing = false;
+  int reconnectDelay = 5;
 
-  listen() {
-    var url = Uri(scheme: "wss", host: _controller.host, port: _controller.port)
+  Events(this._controller) {
+    _url = Uri(scheme: "wss", host: _controller.host, port: _controller.port)
         .resolve(epBase)
         .resolve(epWebsocket);
-    _events =
-        IOWebSocketChannel.connect(url, headers: _controller.getHeaders());
-    _events.stream.listen(_onData, onError: _onError, onDone: _onDone);
   }
 
-  onData(void f(dynamic message)) {
-    _onData = f;
+  connect() {
+    _streamController.add(Event(EventType.connecting));
+    WebSocket.connect(_url.toString(), headers: _controller.getHeaders())
+        .then((ws) {
+      _ws = ws;
+      _channel = IOWebSocketChannel(ws);
+      ws.listen(_onData, onDone: _onDone, onError: _onError);
+      _streamController.add(Event(EventType.connected));
+    });
+  }
+
+  _onData(dynamic message) async {
+    _streamController.add(Event(EventType.data, data: message));
     return this;
   }
 
-  onDone(void f()) {
-    _onDone = f;
+  _onDone() async {
+    _streamController.add(Event(EventType.disconnected));
+    if (!_closing) {
+      _streamController
+          .add(Event(EventType.reconnecting, data: reconnectDelay));
+      await Future.delayed(Duration(seconds: reconnectDelay));
+      await connect();
+    }
     return this;
   }
 
-  onError(void f(Object error)) {
-    _onError = f;
+  _onError(Object error) async {
+    _streamController.add(Event(EventType.error, data: error));
+    if (!_closing) {
+      _streamController
+          .add(Event(EventType.reconnecting, data: reconnectDelay));
+    }
     return this;
   }
 
   close() {
-    _events.sink.close(status.goingAway);
+    _streamController.add(Event(EventType.closing));
+    _closing = true;
+    _streamController.close();
+    _ws.close(status.goingAway);
   }
 }
-*/
+
+class Event {
+  EventType type;
+  dynamic data;
+  Event(this.type, {this.data}) {}
+}
