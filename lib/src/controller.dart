@@ -1,12 +1,16 @@
+library unifi;
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 //import 'package:logging/logging.dart';
+import './utils.dart';
 import './http.dart';
 import './exceptions.dart';
 //import './events.dart';
 import './vouchers.dart';
 import './guests.dart';
+import './events.dart';
 import 'package:path/path.dart' as path;
 
 const siteDefault = 'default';
@@ -15,15 +19,17 @@ const siteDefault = 'default';
 const epBase = 'proxy/network/';
 const epLogin = 'api/auth/login';
 const epLogout = 'api/auth/logout';
+const epWebsocket = 'wss/s/%site%/events';
 
 class UnifiController {
   final String host, username, password, siteId;
-  Uri _baseUrl, _url, _urlLogin, _urlLogout, _urlWebsocket;
+  Uri _baseUrl, _url, _urlLogin, _urlLogout, _urlWs;
   String _csrfToken;
 
   //Events _events;
   Vouchers _vouchers;
   Guests _guests;
+  Events _events;
 
   final int port;
   bool _authenticated = false;
@@ -35,10 +41,11 @@ class UnifiController {
   Cookie jar = Cookie("", "");
   Client _client;
   //final Logger log = Logger('unifi');
+  get authenticated => _authenticated;
 
   get baseUrl => _baseUrl;
 
-  //get events => _events;
+  get events => _events;
   get vouchers => _vouchers;
   get guests => _guests;
 
@@ -49,6 +56,10 @@ class UnifiController {
       this.siteId: siteDefault,
       bool ignoreBadCert: false}) {
     _url = Uri.https('$host:$port', "");
+    _urlWs = Uri.parse("wss://$host:$port")
+        .resolve(epBase)
+        .resolve(epWebsocket.replaceAll("%site%", siteId));
+    print("WSS-> ${_urlWs}");
     _urlLogin = _url.resolve(epLogin);
     _urlLogout = _url.resolve(epLogout);
 
@@ -57,6 +68,7 @@ class UnifiController {
     //_events = Events(this);
     _vouchers = Vouchers(this);
     _guests = Guests(this);
+    _events = Events(this, _client);
 
     //log.level = Level.ALL;
     //log.onRecord.listen((record) {
@@ -166,13 +178,11 @@ class UnifiController {
   }
 
   Map<String, String> getHeaders() {
-    return _merge(
+    return mergeMaps(
         _headers, {'Cookie': jar.toString(), "x-csrf-token": _csrfToken});
   }
-}
 
-Map<String, String> _merge(Map<String, String> a, b) {
-  var c = Map<String, String>.from(a);
-  c.addAll(b);
-  return c;
+  Future<WebSocket> createWebSocket() async {
+    return await _client.webSocket(_urlWs.toString(), _headers);
+  }
 }

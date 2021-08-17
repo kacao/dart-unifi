@@ -14,7 +14,7 @@ void main() {
   tearDown(() async {});
   group('vouchers', () {
     test('connect', () async {
-      await controller.vouchers.list();
+      await controller.events.
     });
   });
 }
