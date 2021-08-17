@@ -3,3 +3,7 @@ Map<String, String> mergeMaps(Map<String, String> a, b) {
   c.addAll(b);
   return c;
 }
+
+String addSiteId(String url, String siteId) {
+  return url.replaceAll("%site%", siteId);
+}

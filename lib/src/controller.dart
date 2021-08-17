@@ -7,13 +7,18 @@ import 'dart:convert';
 import './utils.dart';
 import './http.dart';
 import './exceptions.dart';
-//import './events.dart';
 import './vouchers.dart';
 import './guests.dart';
 import './events.dart';
 import 'package:path/path.dart' as path;
 
 const siteDefault = 'default';
+
+Map<String, String> defaultHeaders = {
+  'Content-Type': 'application/json',
+  'Connection': 'keep-alive',
+  'Accept': 'application/json'
+};
 
 // endpoints
 const epBase = 'proxy/network/';
@@ -26,21 +31,15 @@ class UnifiController {
   Uri _baseUrl, _url, _urlLogin, _urlLogout, _urlWs;
   String _csrfToken;
 
-  //Events _events;
   Vouchers _vouchers;
   Guests _guests;
   Events _events;
 
   final int port;
   bool _authenticated = false;
-  Map<String, String> _headers = {
-    'Content-Type': 'application/json',
-    'Connection': 'keep-alive',
-    'Accept': 'application/json'
-  };
+  Map<String, String> _headers = defaultHeaders;
   Cookie jar = Cookie("", "");
   Client _client;
-  //final Logger log = Logger('unifi');
   get authenticated => _authenticated;
 
   get baseUrl => _baseUrl;
@@ -55,19 +54,16 @@ class UnifiController {
       {this.port: 443,
       this.username: "",
       this.password: "",
-      this.siteId: siteDefault,
-      bool ignoreBadCert: false}) {
+      this.siteId: siteDefault}) {
     _url = Uri.https('$host:$port', "");
     _urlWs = Uri.parse("wss://$host:$port")
         .resolve(epBase)
-        .resolve(epWebsocket.replaceAll("%site%", siteId));
-    print("WSS-> ${_urlWs}");
+        .resolve(addSiteId(epWebsocket, siteId));
     _urlLogin = _url.resolve(epLogin);
     _urlLogout = _url.resolve(epLogout);
 
-    _client = Client(ignoreBadCert: ignoreBadCert);
+    _client = Client();
 
-    //_events = Events(this);
     _vouchers = Vouchers(this);
     _guests = Guests(this);
     _events = Events(this, _client);
@@ -103,11 +99,7 @@ class UnifiController {
       if (sid != null) endpoint = endpoint.replaceAll('%site%', sid);
       url = _url.resolve(path.join(epBase, endpoint));
     }
-    /*print('---');
-    print('fetching $url');
-    print(payloads);
-    print('---');*/
-    final headers = getHeaders();
+    final Map<String, String> headers = getHeaders();
     var res = await _client.fetch(url,
         method: method, headers: headers, payloads: payloads);
 
@@ -141,7 +133,6 @@ class UnifiController {
   }
 
   Future<bool> login() async {
-    // obtain csrf token
     var res = await _client.get(_url);
     this._csrfToken = res.headers['x-csrf-token'];
     final Map<String, String> payloads = {
@@ -156,7 +147,6 @@ class UnifiController {
     }
     if (res.statusCode == HttpStatus.ok) {
       _authenticated = true;
-      //print("Log in successful.");
       return true;
     }
     return false;
@@ -172,11 +162,12 @@ class UnifiController {
       return true;
     }
     return false;
-    //log.finest("Logged out...");
   }
 
   Map<String, String> getHeaders() {
     return mergeMaps(
         _headers, {'Cookie': jar.toString(), "x-csrf-token": _csrfToken});
   }
+
+  Future<void> close() async => _events.close();
 }

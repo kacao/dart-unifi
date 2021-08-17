@@ -1,20 +1,14 @@
-import 'dart:convert';
-import '../lib/unifi.dart';
 import 'package:test/test.dart';
-import 'dart:io';
-import 'package:dotenv/dotenv.dart' show load, env;
 import './utils.dart';
 
-void main() {
-  UnifiController controller;
+Future<void> main() async {
   setUp(() async {
-    String envFile = ".env.test.local." + env["SITE"];
-    controller = loadController(envFile);
+    start();
   });
-  tearDown(() async {});
-  group('vouchers', () {
-    test('connect', () async {
-      await controller.events.
-    });
+  tearDown(() async {
+    await end();
+  });
+  group('events', () {
+    test('connect', () async {});
   });
 }

@@ -2,16 +2,9 @@ library unifi;
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:convert';
-import 'dart:math';
-import './controller.dart';
-import 'package:logging/logging.dart';
-import './exceptions.dart';
+import 'dart:convert' show jsonEncode;
 import 'package:http/http.dart' as http;
-import 'package:http/io_client.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/status.dart' as status;
-import 'package:web_socket_channel/io.dart';
+import 'package:http/io_client.dart' show IOClient;
 
 enum Method { post, get }
 
@@ -19,12 +12,10 @@ class Client {
   http.Client _client;
   HttpClient _wsClient;
 
-  Client({bool ignoreBadCert = false}) {
+  Client() {
     var ioClient = new HttpClient();
-    _wsClient = new HttpClient();
-    if (ignoreBadCert) ioClient.badCertificateCallback = (_, __, ___) => true;
-    if (ignoreBadCert) _wsClient.badCertificateCallback = (_, __, ___) => true;
     _client = IOClient(ioClient);
+    _wsClient = new HttpClient();
   }
 
   Future<http.Response> fetch(Uri url,
@@ -64,36 +55,9 @@ class Client {
         method: Method.post, headers: headers, payloads: payloads);
   }
 
-  Future<WebSocket> createWebSocket(String url, Map<String, String> headers) async {
+  Future<WebSocket> createWebSocket(
+      String url, Map<String, String> headers) async {
     print(headers);
     return await WebSocket.connect(url, headers: headers);
   }
-
-/*
-  ///
-  /// Detach a socket for upgrading to websocket
-  ///
-  Future<WebSocket> createWebSocket(Uri url,
-      {Map<String, String> headers}) async {
-    Random r = new Random();
-    String key = base64.encode(List<int>.generate(8, (_) => r.nextInt(255)));
-    HttpClientRequest request = await _wsClient.getUrl(url);
-    request.headers.add('Connection', 'upgrade');
-    request.headers.add('Upgrade', 'websocket');
-    request.headers.add('sec-websocket-version', '13');
-    request.headers.add('sec-websocket-key', key);
-    if (headers != null) {
-      for (MapEntry<String, String> entry in headers.entries) {
-        request.headers.add(entry.key, entry.value);
-      }
-    }
-    print('before close');
-    print(request.headers);
-    HttpClientResponse response = await request.close();
-    print("HERE: ${response.statusCode}");
-    print(response.reasonPhrase);
-    SecureSocket socket = await response.detachSocket();
-    return WebSocket.fromUpgradedSocket(socket, serverSide: false);
-  }
 }
-*/

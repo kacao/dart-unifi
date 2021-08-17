@@ -69,7 +69,9 @@ class Events {
   void close() async {
     _streamController.add(Event(EventType.closing));
     _closing = true;
-    _ws.close();
+    if (_ws != null) {
+      _ws.close();
+    }
     _streamController.close();
   }
 }
