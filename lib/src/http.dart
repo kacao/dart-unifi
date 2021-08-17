@@ -9,6 +9,9 @@ import 'package:logging/logging.dart';
 import './exceptions.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as status;
+import 'package:web_socket_channel/io.dart';
 
 enum Method { post, get }
 
@@ -61,10 +64,12 @@ class Client {
         method: Method.post, headers: headers, payloads: payloads);
   }
 
-  Future<WebSocket> webSocket(String url, Map<String, String> headers) async {
+  Future<WebSocket> createWebSocket(String url, Map<String, String> headers) async {
+    print(headers);
     return await WebSocket.connect(url, headers: headers);
   }
 
+/*
   ///
   /// Detach a socket for upgrading to websocket
   ///
@@ -91,3 +96,4 @@ class Client {
     return WebSocket.fromUpgradedSocket(socket, serverSide: false);
   }
 }
+*/

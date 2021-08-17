@@ -15,16 +15,22 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
+Future<void> listen(UnifiController c) async {
+  await c.events.connect();
+  await for (var event in c.events.stream) {
+    print("type: ${event.type}");
+  }
+}
+
+Future<void> close(UnifiController c) async {
+  Future.delayed(Duration(seconds: 6), () async {
+    await c.events.close();
+  });
+}
+
 void main() async {
   HttpOverrides.global = new MyHttpOverrides();
   String envFile = ".env.test.local." + env["SITE"];
   UnifiController c = loadController(envFile);
-  await c.events.connect();
-  print('delay');
-  await Future.delayed(
-      Duration(seconds: 6),
-      () async => {
-            await for (var event in c.events.stream) {print(event.type)}
-            //await c.events.close();
-          });
+  print(await Future.wait([listen(c), close(c)]));
 }

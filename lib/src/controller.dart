@@ -49,6 +49,8 @@ class UnifiController {
   get vouchers => _vouchers;
   get guests => _guests;
 
+  get websocketUrl => _urlWs;
+
   UnifiController(this.host,
       {this.port: 443,
       this.username: "",
@@ -128,11 +130,7 @@ class UnifiController {
         jar = Cookie.fromSetCookieValue(res.headers['Set-Cookie']);
       return jsonDecode(res.body)['data'];
     }
-    /*
-    print('error');
-    print(payloads);
-    print(headers);
-    */
+
     var msg = '';
     try {
       msg = jsonDecode(res.body).toString();
@@ -158,10 +156,10 @@ class UnifiController {
     }
     if (res.statusCode == HttpStatus.ok) {
       _authenticated = true;
+      //print("Log in successful.");
       return true;
     }
     return false;
-    //log.info("Log in successful.");
   }
 
   Future<bool> logout() async {
@@ -180,9 +178,5 @@ class UnifiController {
   Map<String, String> getHeaders() {
     return mergeMaps(
         _headers, {'Cookie': jar.toString(), "x-csrf-token": _csrfToken});
-  }
-
-  Future<WebSocket> createWebSocket() async {
-    return await _client.webSocket(_urlWs.toString(), _headers);
   }
 }
