@@ -4,8 +4,10 @@ import 'dart:core';
 import 'dart:async';
 import 'dart:io';
 
-import './controller.dart';
-import './http.dart';
+import 'package:unifi/src/utils.dart';
+
+import 'controller.dart';
+import 'http.dart';
 
 enum EventType {
   connecting,
@@ -31,7 +33,13 @@ class Events {
     _url = _controller.websocketUrl;
   }
 
-  void connect() async {
+  void connect({String siteId}) async {
+    String url;
+    if (siteId != null)
+      url = addSiteId(_url.toString(), siteId);
+    else
+      url = addSiteId(_url.toString(), _controller.siteId);
+
     _streamController.add(Event(EventType.connecting));
     if (!_controller.authenticated) {
       await _controller.login();

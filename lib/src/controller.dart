@@ -4,12 +4,12 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 //import 'package:logging/logging.dart';
-import './utils.dart';
-import './http.dart';
-import './exceptions.dart';
-import './vouchers.dart';
-import './guests.dart';
-import './events.dart';
+import 'utils.dart';
+import 'http.dart';
+import 'exceptions.dart';
+import 'vouchers.dart';
+import 'guests.dart';
+import 'events.dart';
 import 'package:path/path.dart' as path;
 
 const siteDefault = 'default';
@@ -56,9 +56,8 @@ class UnifiController {
       this.password: "",
       this.siteId: siteDefault}) {
     _url = Uri.https('$host:$port', "");
-    _urlWs = Uri.parse("wss://$host:$port")
-        .resolve(epBase)
-        .resolve(addSiteId(epWebsocket, siteId));
+    _urlWs =
+        Uri.parse("wss://$host:$port").resolve(epBase).resolve(epWebsocket);
     _urlLogin = _url.resolve(epLogin);
     _urlLogout = _url.resolve(epLogout);
 

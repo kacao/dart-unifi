@@ -28,9 +28,14 @@ Future<void> close(UnifiController c) async {
   });
 }
 
+void ok({String siteId}) {
+  if (siteId == null) print('nil');
+}
+
 void main() async {
   HttpOverrides.global = new MyHttpOverrides();
-  String envFile = ".env.test.local." + env["SITE"];
+  ok();
+  /*String envFile = ".env.test.local." + env["SITE"];
   UnifiController c = loadController(envFile);
-  print(await Future.wait([listen(c), close(c)]));
+  print(await Future.wait([listen(c), close(c)]));*/
 }

@@ -24,7 +24,7 @@ class Guests {
   /// Returns true
   ///
   Future<bool> authorize(String mac, int minutes,
-      {int up, int down, int megabytes, String ap_mac}) async {
+      {int up, int down, int megabytes, String ap_mac, String siteId}) async {
     var payloads = {
       'mac': mac,
       'minutes': minutes,
@@ -33,16 +33,16 @@ class Guests {
     if (up != null) payloads['up'] = up;
     if (down != null) payloads['down'] = down;
     if (megabytes != null) payloads['megabytes'] = megabytes;
-    await _controller.post(epStaMgr, payloads);
+    await _controller.post(epStaMgr, payloads, siteId: siteId);
     return true;
   }
 
-  Future<bool> _post(String ep, String cmd, String mac) async {
+  Future<bool> _post(String ep, String cmd, String mac, {String siteId}) async {
     var payloads = {
       'mac': mac,
       'cmd': cmd,
     };
-    await _controller.post(ep, payloads);
+    await _controller.post(ep, payloads, siteId: siteId);
     return true;
   }
 
@@ -51,8 +51,8 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> unauthorize(String mac) async {
-    return await _post(epStaMgr, cmdUnauthorize, mac);
+  Future<bool> unauthorize(String mac, {String siteId}) async {
+    return await _post(epStaMgr, cmdUnauthorize, mac, siteId: siteId);
   }
 
   ///
@@ -60,8 +60,8 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> kick(String mac) async {
-    return await _post(epStaMgr, cmdKick, mac);
+  Future<bool> kick(String mac, {String siteId}) async {
+    return await _post(epStaMgr, cmdKick, mac, siteId: siteId);
   }
 
   ///
@@ -69,8 +69,8 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> block(String mac) async {
-    return await _post(epStaMgr, cmdBlock, mac);
+  Future<bool> block(String mac, {String siteId}) async {
+    return await _post(epStaMgr, cmdBlock, mac, siteId: siteId);
   }
 
   ///
@@ -78,8 +78,8 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> unblock(String mac) async {
-    return await _post(epStaMgr, cmdUnblock, mac);
+  Future<bool> unblock(String mac, {String siteId}) async {
+    return await _post(epStaMgr, cmdUnblock, mac, siteId: siteId);
   }
 
   ///
@@ -87,7 +87,7 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> forget(String mac) async {
-    return await _post(epStaMgr, cmdUnblock, mac);
+  Future<bool> forget(String mac, {String siteId}) async {
+    return await _post(epStaMgr, cmdUnblock, mac, siteId: siteId);
   }
 }
