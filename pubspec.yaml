@@ -1,5 +1,5 @@
 name: unifi
-version: 0.1.3
+version: 0.1.4
 description: >-
   A Dart implementation that provides access to Unifi Controllers API 6.x and later.
 homepage: https://github.com/kacao/dart-unifi

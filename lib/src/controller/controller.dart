@@ -170,7 +170,8 @@ class UnifiController {
   void _collectHeaders(Map<String, String> headers) {
     if (headers.containsKey('x-csrf-token'))
       _csrfToken = headers['x-csrf-token'] ?? "";
-    jar = Cookie.fromSetCookieValue(headers['set-cookie']!);
+    if (headers.containsKey('set-cookie'))
+      jar = Cookie.fromSetCookieValue(headers['set-cookie']!);
   }
 
   Future<void> close() async {

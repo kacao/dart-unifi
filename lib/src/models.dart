@@ -1,4 +1,4 @@
 library models;
 
-export '../models/guest/guest.dart';
-export '../models/voucher/voucher.dart';
+export 'models/guest/guest.dart';
+export 'models/voucher/voucher.dart';
