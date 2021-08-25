@@ -7,7 +7,7 @@ import './test/utils.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) =>
@@ -28,14 +28,16 @@ Future<void> close(UnifiController c) async {
   });
 }
 
-void ok({String siteId}) {
-  if (siteId == null) print('nil');
-}
-
 void main() async {
   HttpOverrides.global = new MyHttpOverrides();
-  ok();
+  Map<String, String> m = {"a": "c"};
   /*String envFile = ".env.test.local." + env["SITE"];
   UnifiController c = loadController(envFile);
   print(await Future.wait([listen(c), close(c)]));*/
 }
+
+/*
+
+/ep[A-Z]
+
+*/

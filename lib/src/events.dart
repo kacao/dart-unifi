@@ -1,13 +1,4 @@
-library unifi;
-
-import 'dart:core';
-import 'dart:async';
-import 'dart:io';
-
-import 'package:unifi/src/utils.dart';
-
-import 'controller.dart';
-import 'http.dart';
+part of controller;
 
 enum EventType {
   connecting,
@@ -20,42 +11,34 @@ enum EventType {
 }
 
 class Events {
-  UnifiController _controller;
+  late UnifiController _controller;
   StreamController _streamController = new StreamController.broadcast();
   bool _closing = false;
   int reconnectDelay = 5;
-  Client _client;
-  WebSocket _ws;
-  Uri _url;
+  WebSocket? _ws = null;
+  late String _url;
   Stream<dynamic> get stream => _streamController.stream;
 
-  Events(this._controller, this._client) {
-    _url = _controller.websocketUrl;
+  Events(this._controller) {
+    _url = addSiteId(this._controller._urlWs.toString(), _controller.siteId);
   }
 
-  void connect({String siteId}) async {
-    String url;
-    if (siteId != null)
-      url = addSiteId(_url.toString(), siteId);
-    else
-      url = addSiteId(_url.toString(), _controller.siteId);
-
+  Future<void> connect() async {
     _streamController.add(Event(EventType.connecting));
     if (!_controller.authenticated) {
       await _controller.login();
     }
-    _ws = await _client.createWebSocket(
-        _url.toString(), _controller.getHeaders());
-    await _ws.listen(_onData, onDone: _onDone, onError: _onError);
+    _ws = await _controller._client
+        .createWebSocket(_url.toString(), _controller.getHeaders());
+    await _ws?.listen(_onData, onDone: _onDone, onError: _onError);
     _streamController.add(Event(EventType.connected));
   }
 
-  void _onData(dynamic message) async {
+  Future<void> _onData(dynamic message) async {
     _streamController.add(Event(EventType.data, data: message));
   }
 
-  void _onDone() async {
-    print('done');
+  Future<void> _onDone() async {
     if (!_closing) {
       _streamController.add(Event(EventType.disconnected));
       _streamController
@@ -65,7 +48,7 @@ class Events {
     }
   }
 
-  void _onError(Object error) async {
+  Future<void> _onError(Object error) async {
     print(error);
     _streamController.add(Event(EventType.error, data: error));
     if (!_closing) {
@@ -74,12 +57,10 @@ class Events {
     }
   }
 
-  void close() async {
+  Future<void> _close() async {
     _streamController.add(Event(EventType.closing));
     _closing = true;
-    if (_ws != null) {
-      _ws.close();
-    }
+    _ws?.close();
     _streamController.close();
   }
 }

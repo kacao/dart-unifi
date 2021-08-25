@@ -1,6 +1,7 @@
-import 'controller.dart';
+part of controller;
 
-const epStaMgr = 'api/s/%site%/cmd/stamgr';
+const _epStaMgr = 'api/s/%site%/cmd/stamgr';
+const _epStatGuest = 'api/s/%site%/stat/guest';
 
 const cmdAuthorize = 'authorize-guest';
 const cmdUnauthorize = 'unauthorize-guest';
@@ -24,7 +25,11 @@ class Guests {
   /// Returns true
   ///
   Future<bool> authorize(String mac, int minutes,
-      {int up, int down, int megabytes, String ap_mac, String siteId}) async {
+      {int? up,
+      int? down,
+      int? megabytes,
+      String? ap_mac,
+      String? siteId}) async {
     var payloads = {
       'mac': mac,
       'minutes': minutes,
@@ -33,16 +38,7 @@ class Guests {
     if (up != null) payloads['up'] = up;
     if (down != null) payloads['down'] = down;
     if (megabytes != null) payloads['megabytes'] = megabytes;
-    await _controller.post(epStaMgr, payloads, siteId: siteId);
-    return true;
-  }
-
-  Future<bool> _post(String ep, String cmd, String mac, {String siteId}) async {
-    var payloads = {
-      'mac': mac,
-      'cmd': cmd,
-    };
-    await _controller.post(ep, payloads, siteId: siteId);
+    await _controller.post(_epStaMgr, payloads, siteId: siteId);
     return true;
   }
 
@@ -51,8 +47,8 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> unauthorize(String mac, {String siteId}) async {
-    return await _post(epStaMgr, cmdUnauthorize, mac, siteId: siteId);
+  Future<bool> unauthorize(String mac, {String? siteId}) async {
+    return await _post(_epStaMgr, cmdUnauthorize, mac, siteId: siteId);
   }
 
   ///
@@ -60,8 +56,8 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> kick(String mac, {String siteId}) async {
-    return await _post(epStaMgr, cmdKick, mac, siteId: siteId);
+  Future<bool> kick(String mac, {String? siteId}) async {
+    return await _post(_epStaMgr, cmdKick, mac, siteId: siteId);
   }
 
   ///
@@ -69,8 +65,8 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> block(String mac, {String siteId}) async {
-    return await _post(epStaMgr, cmdBlock, mac, siteId: siteId);
+  Future<bool> block(String mac, {String? siteId}) async {
+    return await _post(_epStaMgr, cmdBlock, mac, siteId: siteId);
   }
 
   ///
@@ -78,8 +74,8 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> unblock(String mac, {String siteId}) async {
-    return await _post(epStaMgr, cmdUnblock, mac, siteId: siteId);
+  Future<bool> unblock(String mac, {String? siteId}) async {
+    return await _post(_epStaMgr, cmdUnblock, mac, siteId: siteId);
   }
 
   ///
@@ -87,7 +83,26 @@ class Guests {
   ///
   /// Returns true
   ///
-  Future<bool> forget(String mac, {String siteId}) async {
-    return await _post(epStaMgr, cmdUnblock, mac, siteId: siteId);
+  Future<bool> forget(String mac, {String? siteId}) async {
+    return await _post(_epStaMgr, cmdUnblock, mac, siteId: siteId);
+  }
+
+  ///
+  /// List guest devices
+  ///
+  Future<List<Guest>> list({int? within, String? siteId}) async {
+    var ep = within != null ? "${_epStatGuest}?within=${within}" : _epStatGuest;
+    var res = toList(await _controller.fetch(ep, siteId: siteId));
+    return List<Guest>.of(res.map((e) => Guest.fromJson(e)));
+  }
+
+  Future<bool> _post(String ep, String cmd, String mac,
+      {String? siteId}) async {
+    var payloads = {
+      'mac': mac,
+      'cmd': cmd,
+    };
+    await _controller.post(ep, payloads, siteId: siteId);
+    return true;
   }
 }

@@ -19,6 +19,12 @@ void main() {
     });
   });
   group('guests', () {
+    test('list', () async {
+      List<Guest> res = await controller.guests.list();
+      res.forEach((element) {
+        print(element);
+      });
+    });
     test('authorize', () async {
       const mac = '00:15:5d:07:cc:14';
       await controller.guests.authorize(mac, 286);
@@ -26,11 +32,6 @@ void main() {
     test('unauthorize', () async {
       const mac = '00:15:5d:07:cc:14';
       await controller.guests.unauthorize(mac);
-    });
-  });
-  group('vouchers', () {
-    test('listVouchers', () async {
-      await controller.vouchers.list();
     });
   });
 }

@@ -1,16 +1,22 @@
-library unifi;
+library controller;
 
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
-//import 'package:logging/logging.dart';
-import 'utils.dart';
-import 'http.dart';
-import 'exceptions.dart';
-import 'vouchers.dart';
-import 'guests.dart';
-import 'events.dart';
+import 'dart:core';
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart' show IOClient;
+import 'models.dart';
+
+//import 'package:logging/logging.dart';
+
+part 'utils.dart';
+part 'http.dart';
+part 'exceptions.dart';
+part 'vouchers.dart';
+part 'guests.dart';
+part 'events.dart';
 
 const siteDefault = 'default';
 
@@ -21,51 +27,44 @@ Map<String, String> defaultHeaders = {
 };
 
 // endpoints
-const epBase = 'proxy/network/';
-const epLogin = 'api/auth/login';
-const epLogout = 'api/auth/logout';
-const epWebsocket = 'wss/s/%site%/events';
+const _epBase = 'proxy/network/';
+const _epLogin = 'api/auth/login';
+const _epLogout = 'api/auth/logout';
+const _epWebsocket = 'wss/s/%site%/events';
 
 class UnifiController {
   final String host, username, password, siteId;
-  Uri _baseUrl, _url, _urlLogin, _urlLogout, _urlWs;
-  String _csrfToken;
-
-  Vouchers _vouchers;
-  Guests _guests;
-  Events _events;
-
   final int port;
+  late Uri _url, _urlLogin, _urlLogout, _urlWs;
+  String _csrfToken = '';
   bool _authenticated = false;
-  Map<String, String> _headers = defaultHeaders;
+
+  late Vouchers _vouchers;
+  late Guests _guests;
+  late Events _events;
+  final Client _client = Client();
+  Map<String, String> _headers = Map<String, String>.from(defaultHeaders);
   Cookie jar = Cookie("", "");
-  Client _client;
+
   get authenticated => _authenticated;
-
-  get baseUrl => _baseUrl;
-
   get events => _events;
   get vouchers => _vouchers;
   get guests => _guests;
 
-  get websocketUrl => _urlWs;
-
   UnifiController(this.host,
       {this.port: 443,
-      this.username: "",
-      this.password: "",
+      required this.username,
+      required this.password,
       this.siteId: siteDefault}) {
     _url = Uri.https('$host:$port', "");
     _urlWs =
-        Uri.parse("wss://$host:$port").resolve(epBase).resolve(epWebsocket);
-    _urlLogin = _url.resolve(epLogin);
-    _urlLogout = _url.resolve(epLogout);
-
-    _client = Client();
+        Uri.parse("wss://$host:$port").resolve(_epBase).resolve(_epWebsocket);
+    _urlLogin = _url.resolve(_epLogin);
+    _urlLogout = _url.resolve(_epLogout);
 
     _vouchers = Vouchers(this);
     _guests = Guests(this);
-    _events = Events(this, _client);
+    _events = Events(this);
 
     //log.level = Level.ALL;
     //log.onRecord.listen((record) {
@@ -74,7 +73,7 @@ class UnifiController {
   }
 
   Future<dynamic> post(String endpoint, Map<String, dynamic> payloads,
-      {String siteId, bool authenticate: true}) async {
+      {String? siteId, bool authenticate: true}) async {
     return await fetch(endpoint,
         payloads: payloads,
         method: Method.post,
@@ -84,8 +83,8 @@ class UnifiController {
 
   Future<dynamic> fetch(String endpoint,
       {Method method: Method.get,
-      Map<String, dynamic> payloads,
-      String siteId,
+      Map<String, dynamic>? payloads,
+      String? siteId,
       bool authenticate: true}) async {
     if (!_authenticated) await login();
     var sid = this.siteId;
@@ -94,9 +93,9 @@ class UnifiController {
     if (endpoint.contains("login") | (endpoint.contains("logout"))) {
       url = _url.resolve(endpoint);
     } else {
-      if (siteId != null) sid = siteId;
-      if (sid != null) endpoint = endpoint.replaceAll('%site%', sid);
-      url = _url.resolve(path.join(epBase, endpoint));
+      sid = siteId ?? this.siteId;
+      endpoint = endpoint.replaceAll('%site%', sid);
+      url = _url.resolve(path.join(_epBase, endpoint));
     }
     final Map<String, String> headers = getHeaders();
     var res = await _client.fetch(url,
@@ -115,10 +114,7 @@ class UnifiController {
     }
 
     if (res.statusCode == HttpStatus.ok) {
-      this._csrfToken = res.headers['x-csrf-token'];
-
-      if (res.headers['Set-Cookie'] != null)
-        jar = Cookie.fromSetCookieValue(res.headers['Set-Cookie']);
+      _collectHeaders(res.headers);
       return jsonDecode(res.body)['data'];
     }
 
@@ -133,17 +129,14 @@ class UnifiController {
 
   Future<bool> login() async {
     var res = await _client.get(_url);
-    this._csrfToken = res.headers['x-csrf-token'];
+    this._csrfToken = res.headers['x-csrf-token'] ?? "";
     final Map<String, String> payloads = {
       'username': username,
       'password': password
     };
     final headers = getHeaders();
     res = await _client.post(_urlLogin, headers: headers, payloads: payloads);
-    this._csrfToken = res.headers['x-csrf-token'];
-    if (res.headers['set-cookie'] != null) {
-      jar = Cookie.fromSetCookieValue(res.headers['set-cookie']);
-    }
+    _collectHeaders(res.headers);
     if (res.statusCode == HttpStatus.ok) {
       _authenticated = true;
       return true;
@@ -152,7 +145,7 @@ class UnifiController {
   }
 
   Future<bool> logout() async {
-    final headers = getHeaders();
+    var headers = getHeaders();
     var res = await _client.post(_urlLogout, headers: headers);
     if (res.statusCode == HttpStatus.ok) {
       jar = Cookie("", "");
@@ -164,9 +157,20 @@ class UnifiController {
   }
 
   Map<String, String> getHeaders() {
-    return mergeMaps(
-        _headers, {'Cookie': jar.toString(), "x-csrf-token": _csrfToken});
+    Map<String, String> addons = {
+      'Cookie': jar.toString(),
+      "x-csrf-token": _csrfToken
+    };
+    return mergeMaps(_headers, addons);
   }
 
-  Future<void> close() async => _events.close();
+  ///
+  /// update csrf token and cookies based on latest http response
+  ///
+  void _collectHeaders(Map<String, String> headers) {
+    _csrfToken = headers['x-csrf-token'] ?? "";
+    jar = Cookie.fromSetCookieValue(headers['set-cookie']!);
+  }
+
+  Future<void> close() async => _events._close();
 }
