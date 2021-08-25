@@ -1,6 +1,6 @@
 import '../lib/unifi.dart';
 import 'package:test/test.dart';
-import './utils.dart';
+import 'utils.dart';
 
 void main() {
   setUp(() async {
@@ -11,19 +11,22 @@ void main() {
   });
   test("auth", () async {
     expect(await controller.login(), equals(true));
-    expect(await controller.logout(), equals(true));
+    //expect(await controller.logout(), equals(true));
   });
   group('vouchers', () {
-    test('list', () async {
-      await controller.vouchers.list();
+    test('create/list/revoke', () async {
+      int since = await controller.vouchers.create(24);
+      expect(since, greaterThan(0));
+      List<Voucher> vouchers = await controller.vouchers.list();
+      expect(vouchers.length, greaterThan(0));
+      vouchers.forEach((element) async {
+        await controller.vouchers.revoke(element.id);
+      });
     });
   });
   group('guests', () {
     test('list', () async {
       List<Guest> res = await controller.guests.list();
-      res.forEach((element) {
-        print(element);
-      });
     });
     test('authorize', () async {
       const mac = '00:15:5d:07:cc:14';

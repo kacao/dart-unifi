@@ -1,6 +1,4 @@
 library models;
 
-import 'package:json_annotation/json_annotation.dart';
-
-part 'models/guests.dart';
-part 'models.g.dart';
+export '../models/guest/guest.dart';
+export '../models/voucher/voucher.dart';

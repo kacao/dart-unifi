@@ -7,11 +7,11 @@ import 'dart:core';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' show IOClient;
-import 'models.dart';
+import '../models.dart';
+import '../utils.dart';
 
 //import 'package:logging/logging.dart';
 
-part 'utils.dart';
 part 'http.dart';
 part 'exceptions.dart';
 part 'vouchers.dart';
@@ -168,9 +168,13 @@ class UnifiController {
   /// update csrf token and cookies based on latest http response
   ///
   void _collectHeaders(Map<String, String> headers) {
-    _csrfToken = headers['x-csrf-token'] ?? "";
+    if (headers.containsKey('x-csrf-token'))
+      _csrfToken = headers['x-csrf-token'] ?? "";
     jar = Cookie.fromSetCookieValue(headers['set-cookie']!);
   }
 
-  Future<void> close() async => _events._close();
+  Future<void> close() async {
+    await _events._close();
+    await logout();
+  }
 }

@@ -1,5 +1,3 @@
-part of controller;
-
 Map<String, String> mergeMaps(Map<String, String> a, b) {
   var c = Map<String, String>.of(a);
   c.addAll(b);

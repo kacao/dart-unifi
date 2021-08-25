@@ -22,9 +22,9 @@ class Guests {
   /// [megabytes]: data transfer limit in mb
   /// [ap_mac] optional AP's mac
   ///
-  /// Returns true
+  /// Throw [ApiException] if not successful
   ///
-  Future<bool> authorize(String mac, int minutes,
+  Future<void> authorize(String mac, int minutes,
       {int? up,
       int? down,
       int? megabytes,
@@ -39,56 +39,56 @@ class Guests {
     if (down != null) payloads['down'] = down;
     if (megabytes != null) payloads['megabytes'] = megabytes;
     await _controller.post(_epStaMgr, payloads, siteId: siteId);
-    return true;
   }
 
   ///
   /// Unauthorize a [mac].
   ///
-  /// Returns true
+  /// Throw [ApiException] if not successful
   ///
-  Future<bool> unauthorize(String mac, {String? siteId}) async {
-    return await _post(_epStaMgr, cmdUnauthorize, mac, siteId: siteId);
+  Future<void> unauthorize(String mac, {String? siteId}) async {
+    await _post(_epStaMgr, cmdUnauthorize, mac, siteId: siteId);
   }
 
   ///
   /// Kick (reconnect) a [mac].
   ///
-  /// Returns true
+  /// Throw [ApiException] if not successful
   ///
-  Future<bool> kick(String mac, {String? siteId}) async {
-    return await _post(_epStaMgr, cmdKick, mac, siteId: siteId);
+  Future<void> kick(String mac, {String? siteId}) async {
+    await _post(_epStaMgr, cmdKick, mac, siteId: siteId);
   }
 
   ///
   /// Block a [mac].
   ///
-  /// Returns true
+  /// Throw [ApiException] if not successful
   ///
-  Future<bool> block(String mac, {String? siteId}) async {
-    return await _post(_epStaMgr, cmdBlock, mac, siteId: siteId);
+  Future<void> block(String mac, {String? siteId}) async {
+    await _post(_epStaMgr, cmdBlock, mac, siteId: siteId);
   }
 
   ///
   /// Unblock a [mac].
   ///
-  /// Returns true
+  /// Throw [ApiException] if not successful
   ///
-  Future<bool> unblock(String mac, {String? siteId}) async {
-    return await _post(_epStaMgr, cmdUnblock, mac, siteId: siteId);
+  Future<void> unblock(String mac, {String? siteId}) async {
+    await _post(_epStaMgr, cmdUnblock, mac, siteId: siteId);
   }
 
   ///
   /// Forget a [mac].
   ///
-  /// Returns true
+  /// Throw [ApiException] if not successful
   ///
-  Future<bool> forget(String mac, {String? siteId}) async {
-    return await _post(_epStaMgr, cmdUnblock, mac, siteId: siteId);
+  Future<void> forget(String mac, {String? siteId}) async {
+    await _post(_epStaMgr, cmdUnblock, mac, siteId: siteId);
   }
 
   ///
-  /// List guest devices
+  /// List guest devices [within] hours
+  /// Throw [ApiException] if not successful
   ///
   Future<List<Guest>> list({int? within, String? siteId}) async {
     var ep = within != null ? "${_epStatGuest}?within=${within}" : _epStatGuest;
@@ -96,13 +96,12 @@ class Guests {
     return List<Guest>.of(res.map((e) => Guest.fromJson(e)));
   }
 
-  Future<bool> _post(String ep, String cmd, String mac,
+  Future<void> _post(String ep, String cmd, String mac,
       {String? siteId}) async {
     var payloads = {
       'mac': mac,
       'cmd': cmd,
     };
     await _controller.post(ep, payloads, siteId: siteId);
-    return true;
   }
 }
