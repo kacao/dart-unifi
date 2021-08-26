@@ -10,6 +10,14 @@ enum EventType {
   closing
 }
 
+enum ReadyState { connecting, open, closing, closed }
+Map<int, ReadyState> _readyStateMap = {
+  0: ReadyState.connecting,
+  1: ReadyState.open,
+  2: ReadyState.closing,
+  3: ReadyState.closed
+};
+
 class Events {
   late Controller _controller;
   StreamController _streamController = new StreamController.broadcast();
@@ -18,7 +26,7 @@ class Events {
   WebSocket? _ws = null;
   late String _url;
   Stream<dynamic> get stream => _streamController.stream;
-
+  ReadyState? get readyState => _readyStateMap[_ws?.readyState ?? 3];
   Events(this._controller) {
     _url = addSiteId(this._controller._urlWs.toString(), _controller.siteId);
   }
