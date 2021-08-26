@@ -11,7 +11,7 @@ enum EventType {
 }
 
 class Events {
-  late UnifiController _controller;
+  late Controller _controller;
   StreamController _streamController = new StreamController.broadcast();
   bool _closing = false;
   int reconnectDelay = 5;

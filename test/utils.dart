@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:dotenv/dotenv.dart' show load, env;
 import '../lib/unifi.dart';
 
-late UnifiController controller;
+late Controller controller;
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -16,7 +16,7 @@ class MyHttpOverrides extends HttpOverrides {
 
 void start() {
   HttpOverrides.global = new MyHttpOverrides();
-  String envFile = ".env.test.local." + (env["SITE"] ?? "");
+  String envFile = "../env/.env.test.local." + (env["SITE"] ?? "");
   load(envFile);
   final host = env['UNIFI_HOST'] ?? "";
   final port = env['UNIFI_PORT'] ?? "";

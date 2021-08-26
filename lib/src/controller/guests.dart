@@ -11,7 +11,7 @@ const cmdUnblock = 'unblock-sta';
 const cmdForget = 'forget-sta';
 
 class Guests {
-  UnifiController _controller;
+  Controller _controller;
 
   Guests(this._controller);
 
