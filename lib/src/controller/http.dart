@@ -1,4 +1,4 @@
-part of controller;
+part of 'controller.dart';
 
 enum Method { post, get }
 

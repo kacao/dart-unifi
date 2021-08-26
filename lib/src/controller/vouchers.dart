@@ -1,4 +1,4 @@
-part of controller;
+part of 'controller.dart';
 
 const _epHotspot = 'api/s/%site%/cmd/hotspot';
 const _epStaVoucher = 'api/s/%site%/stat/voucher';

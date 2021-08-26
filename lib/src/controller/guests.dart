@@ -1,4 +1,4 @@
-part of controller;
+part of 'controller.dart';
 
 const _epStaMgr = 'api/s/%site%/cmd/stamgr';
 const _epStatGuest = 'api/s/%site%/stat/guest';

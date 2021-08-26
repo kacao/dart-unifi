@@ -1,4 +1,4 @@
-part of controller;
+part of 'controller.dart';
 
 class RequestException implements Exception {
   final String message;
