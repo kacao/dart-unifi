@@ -23,7 +23,7 @@ void start() {
   final username = env['UNIFI_USERNAME'] ?? "";
   final password = env['UNIFI_PASSWORD'] ?? "";
   final siteId = env['UNIFI_SITE'] ?? "";
-  controller = UnifiController(host,
+  controller = Controller(host,
       port: int.parse(port),
       username: username,
       password: password,

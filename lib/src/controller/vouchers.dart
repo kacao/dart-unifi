@@ -7,7 +7,7 @@ const _cmdCreateVoucher = 'create-voucher';
 const _cmdDeleteVoucher = 'delete-voucher';
 
 class Vouchers {
-  UnifiController _controller;
+  Controller _controller;
 
   Vouchers(this._controller);
 

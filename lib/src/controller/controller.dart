@@ -32,7 +32,7 @@ const _epLogin = 'api/auth/login';
 const _epLogout = 'api/auth/logout';
 const _epWebsocket = 'wss/s/%site%/events';
 
-class UnifiController {
+class Controller {
   final String host, username, password, siteId;
   final int port;
   late Uri _url, _urlLogin, _urlLogout, _urlWs;
@@ -51,7 +51,7 @@ class UnifiController {
   get vouchers => _vouchers;
   get guests => _guests;
 
-  UnifiController(this.host,
+  Controller(this.host,
       {this.port: 443,
       required this.username,
       required this.password,
