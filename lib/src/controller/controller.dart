@@ -49,8 +49,9 @@ class Controller {
   get vouchers => _vouchers;
   get guests => _guests;
 
-  Controller(this.host,
-      {this.port: 443,
+  Controller(
+      {required this.host,
+      this.port: 443,
       required this.username,
       required this.password,
       this.siteId: siteDefault}) {
@@ -68,6 +69,14 @@ class Controller {
     //log.onRecord.listen((record) {
     //  print('${record.level.name}: ${record.time}: ${record.message}');
     //});
+  }
+
+  factory Controller.fromMap(Map<String, dynamic> map) {
+    return Controller(
+        host: map['host'],
+        port: map['port'],
+        username: map['username'],
+        password: map['password']);
   }
 
   Future<dynamic> post(String endpoint, Map<String, dynamic> payloads,

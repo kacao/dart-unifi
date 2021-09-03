@@ -1,5 +1,5 @@
 import 'dart:convert';
-import './lib/unifi.dart';
+import './lib/unifi.dart' as unifi;
 import 'package:test/test.dart';
 import 'dart:io';
 import 'package:dotenv/dotenv.dart' show load, env;
@@ -15,14 +15,14 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-Future<void> listen(UnifiController c) async {
+Future<void> listen(unifi.Controller c) async {
   await c.events.connect();
   await for (var event in c.events.stream) {
     print("type: ${event.type}");
   }
 }
 
-Future<void> close(UnifiController c) async {
+Future<void> close(unifi.Controller c) async {
   Future.delayed(Duration(seconds: 6), () async {
     await c.events.close();
   });
@@ -31,13 +31,4 @@ Future<void> close(UnifiController c) async {
 void main() async {
   HttpOverrides.global = new MyHttpOverrides();
   Map<String, String> m = {"a": "c"};
-  /*String envFile = ".env.test.local." + env["SITE"];
-  UnifiController c = loadController(envFile);
-  print(await Future.wait([listen(c), close(c)]));*/
 }
-
-/*
-
-/ep[A-Z]
-
-*/
