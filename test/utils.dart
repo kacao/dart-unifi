@@ -32,5 +32,5 @@ void start() {
 }
 
 Future<void> end() async {
-  await controller.close();
+  controller.dispose();
 }

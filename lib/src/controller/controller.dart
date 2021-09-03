@@ -181,8 +181,8 @@ class Controller {
       jar = Cookie.fromSetCookieValue(headers['set-cookie']!);
   }
 
-  Future<void> close() async {
-    await _events._close();
-    await logout();
+  void dispose() {
+    _events.dispose();
+    logout();
   }
 }

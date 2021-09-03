@@ -65,7 +65,7 @@ class Events {
     }
   }
 
-  Future<void> _close() async {
+  void dispose() {
     _streamController.add(Event(EventType.closing));
     _closing = true;
     _ws?.close();
