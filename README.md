@@ -7,7 +7,7 @@ Unifi Controller API for Dart
 ```
 import 'package:unifi/unifi.dart';
 
-controller = UnifiController(host, port: port, username: username, password: password, siteId: siteId);
+controller = UnifiController(host: host, port: port, username: username, password: password, siteId: siteId);
 
 try {
     var since = await controller.vouchers.create(60);
