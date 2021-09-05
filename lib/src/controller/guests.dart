@@ -90,10 +90,11 @@ class Guests {
   /// List guest devices [within] hours
   /// Throw [ApiException] if not successful
   ///
-  Future<List<Guest>> list({int? within, String? siteId}) async {
+  Future<List<Map<String, dynamic>>> list({int? within, String? siteId}) async {
     var ep = within != null ? "${_epStatGuest}?within=${within}" : _epStatGuest;
     var res = toList(await _controller.fetch(ep, siteId: siteId));
-    return List<Guest>.of(res.map((e) => Guest.fromJson(e)));
+    //return List<Guest>.of(res.map((e) => Guest.fromJson(e)));
+    return res;
   }
 
   Future<void> _post(String ep, String cmd, String mac,

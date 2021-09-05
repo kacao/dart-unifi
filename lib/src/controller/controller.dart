@@ -5,7 +5,7 @@ import 'dart:core';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' show IOClient;
-import '../models.dart';
+import 'package:rxdart/rxdart.dart';
 import '../utils.dart';
 
 //import 'package:logging/logging.dart';
@@ -116,7 +116,7 @@ class Controller {
             siteId: siteId,
             authenticate: false);
       } else {
-        throw RequestException("Unable to login");
+        throw InvalidCredentials("Invalid login");
       }
     }
 
@@ -146,6 +146,7 @@ class Controller {
     _collectHeaders(res.headers);
     if (res.statusCode == HttpStatus.ok) {
       _authenticated = true;
+      events._add(Event(EventType.authenticated));
       return true;
     }
     return false;
@@ -158,6 +159,7 @@ class Controller {
       jar = Cookie("", "");
       _csrfToken = "";
       _authenticated = false;
+      events._add(Event(EventType.unauthenticated));
       return true;
     }
     return false;

@@ -18,3 +18,12 @@ class ApiException implements Exception {
     return 'Unifi Controller API Exception: [$statusCode] $message';
   }
 }
+
+class InvalidCredentials implements Exception {
+  final String message;
+  InvalidCredentials(this.message);
+
+  toString() {
+    return message;
+  }
+}

@@ -48,12 +48,13 @@ class Vouchers {
   ///
   /// Returns a list of [Voucher] since [createTime]
   ///
-  Future<List<Voucher>> list({int? createTime, String? siteId}) async {
+  Future<List<Map<String, dynamic>>> list(
+      {int? createTime, String? siteId}) async {
     Map<String, dynamic> payloads = {};
     if (createTime != null) payloads['create_time'] = createTime;
-    List<dynamic> res =
-        await _controller.post(_epStaVoucher, payloads, siteId: siteId);
-    return List<Voucher>.from(res.map((e) => Voucher.fromJson(e)));
+    var res = await _controller.post(_epStaVoucher, payloads, siteId: siteId);
+    //return List<Voucher>.from(res.map((e) => Voucher.fromJson(e)));
+    return toList(res);
   }
 
   ///

@@ -1,5 +1,5 @@
 name: unifi
-version: 0.1.11
+version: 0.1.13
 description: >-
   A Dart implementation that provides access to Unifi Controllers API 6.x and later.
 homepage: https://github.com/kacao/dart-unifi
@@ -13,6 +13,7 @@ dependencies:
   path: ^1.8.0
   json_annotation: ^4.0.0
   equatable: ^2.0.3
+  rxdart: ^0.27.2
 dev_dependencies: 
   dotenv: ^3.0.0-nullsafety.0
   json_serializable: ^5.0.0
