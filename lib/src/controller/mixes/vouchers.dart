@@ -1,4 +1,4 @@
-part of 'controller.dart';
+part of 'package:unifi/src/controller/controller.dart';
 
 const _epHotspot = 'api/s/%site%/cmd/hotspot';
 const _epStaVoucher = 'api/s/%site%/stat/voucher';
@@ -6,10 +6,8 @@ const _epStaVoucher = 'api/s/%site%/stat/voucher';
 const _cmdCreateVoucher = 'create-voucher';
 const _cmdDeleteVoucher = 'delete-voucher';
 
-class Vouchers {
-  Controller _controller;
-
-  Vouchers(this._controller);
+class Vouchers extends Ext {
+  Vouchers(BaseController controller) : super(controller);
 
   ///
   /// [minutes]: number of valid minutes after activation
@@ -65,4 +63,9 @@ class Vouchers {
     var payloads = {'_id': id, 'cmd': _cmdDeleteVoucher};
     await _controller.post(_epHotspot, payloads, siteId: siteId);
   }
+}
+
+mixin VouchersMix on BaseController {
+  late Vouchers _vouchers = Vouchers(this);
+  Vouchers get vouchers => _vouchers;
 }

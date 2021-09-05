@@ -9,12 +9,12 @@ import 'package:rxdart/rxdart.dart';
 import '../utils.dart';
 
 //import 'package:logging/logging.dart';
-
-part 'http.dart';
-part 'exceptions.dart';
-part 'vouchers.dart';
-part 'guests.dart';
-part 'events.dart';
+part 'package:unifi/src/controller/ext.dart';
+part 'package:unifi/src/controller/http.dart';
+part 'package:unifi/src/controller/exceptions.dart';
+part 'package:unifi/src/controller/mixes/vouchers.dart';
+part 'package:unifi/src/controller/mixes/guests.dart';
+part 'package:unifi/src/controller/mixes/events.dart';
 
 const siteDefault = 'default';
 
@@ -30,24 +30,18 @@ const _epLogin = 'api/auth/login';
 const _epLogout = 'api/auth/logout';
 const _epWebsocket = 'wss/s/%site%/events';
 
-class Controller {
+class Controller extends BaseController with GuestsMix, VouchersMix, EventsMix {
   final String host, username, password, siteId;
   final int port;
   late Uri _url, _urlLogin, _urlLogout, _urlWs;
   String _csrfToken = '';
   bool _authenticated = false;
 
-  late Vouchers _vouchers;
-  late Guests _guests;
-  late Events _events;
   final Client _client = Client();
   Map<String, String> _headers = Map<String, String>.from(defaultHeaders);
   Cookie jar = Cookie("", "");
 
   get authenticated => _authenticated;
-  get events => _events;
-  get vouchers => _vouchers;
-  get guests => _guests;
 
   Controller(
       {required this.host,
@@ -60,10 +54,6 @@ class Controller {
         Uri.parse("wss://$host:$port").resolve(_epBase).resolve(_epWebsocket);
     _urlLogin = _url.resolve(_epLogin);
     _urlLogout = _url.resolve(_epLogout);
-
-    _vouchers = Vouchers(this);
-    _guests = Guests(this);
-    _events = Events(this);
 
     //log.level = Level.ALL;
     //log.onRecord.listen((record) {
@@ -79,6 +69,7 @@ class Controller {
         password: map['password']);
   }
 
+  @override
   Future<dynamic> post(String endpoint, Map<String, dynamic> payloads,
       {String? siteId, bool authenticate: true}) async {
     return await fetch(endpoint,
@@ -88,6 +79,7 @@ class Controller {
         authenticate: authenticate);
   }
 
+  @override
   Future<dynamic> fetch(String endpoint,
       {Method method: Method.get,
       Map<String, dynamic>? payloads,
@@ -165,6 +157,7 @@ class Controller {
     return false;
   }
 
+  @override
   Map<String, String> getHeaders() {
     Map<String, String> addons = {
       'Cookie': jar.toString(),
@@ -187,4 +180,16 @@ class Controller {
     _events.dispose();
     logout();
   }
+}
+
+abstract class BaseController {
+  Future<dynamic> post(String endpoint, Map<String, dynamic> payloads,
+      {String? siteId, bool authenticate: true});
+
+  Future<dynamic> fetch(String endpoint,
+      {Method method: Method.get,
+      Map<String, dynamic>? payloads,
+      String? siteId,
+      bool authenticate: true});
+  Map<String, String> getHeaders();
 }

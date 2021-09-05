@@ -1,4 +1,4 @@
-part of 'controller.dart';
+part of 'package:unifi/src/controller/controller.dart';
 
 enum EventType {
   authenticated,
@@ -20,8 +20,7 @@ Map<int, ReadyState> _readyStateMap = {
   3: ReadyState.closed
 };
 
-class Events {
-  late Controller _controller;
+class Events extends Ext {
   StreamController _sink = new StreamController.broadcast();
   bool _closing = false;
   int reconnectDelay = 5;
@@ -29,16 +28,19 @@ class Events {
   late String _url;
   Stream<dynamic> get stream => _sink.stream;
   ReadyState? get readyState => _readyStateMap[_ws?.readyState ?? 3];
-  Events(this._controller) {
-    _url = addSiteId(this._controller._urlWs.toString(), _controller.siteId);
+  late Controller controller;
+  Events(BaseController controller) : super(controller) {
+    this.controller = (controller as Controller);
+    _url = addSiteId(this.controller._urlWs.toString(), this.controller.siteId);
   }
 
   Future<void> connect() async {
+    var controller = this.controller;
     _sink.add(Event(EventType.connecting));
-    if (!_controller.authenticated) {
-      await _controller.login();
+    if (controller.authenticated) {
+      await controller.login();
     }
-    _ws = await _controller._client
+    _ws = await controller._client
         .createWebSocket(_url.toString(), _controller.getHeaders());
     await _ws?.listen(_onData, onDone: _onDone, onError: _onError);
     _sink.add(Event(EventType.connected));
@@ -75,6 +77,12 @@ class Events {
     _ws?.close();
     _sink.close();
   }
+}
+
+mixin EventsMix on BaseController {
+  late Events _events = Events(this);
+  Events get events => _events;
+  Stream get stream => _events.stream;
 }
 
 class Event {

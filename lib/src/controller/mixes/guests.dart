@@ -1,4 +1,4 @@
-part of 'controller.dart';
+part of 'package:unifi/src/controller/controller.dart';
 
 const _epStaMgr = 'api/s/%site%/cmd/stamgr';
 const _epStatGuest = 'api/s/%site%/stat/guest';
@@ -10,10 +10,8 @@ const cmdBlock = 'block-sta';
 const cmdUnblock = 'unblock-sta';
 const cmdForget = 'forget-sta';
 
-class Guests {
-  Controller _controller;
-
-  Guests(this._controller);
+class Guests extends Ext {
+  Guests(BaseController controller) : super(controller);
 
   ///
   /// Authorize a [mac] for [minutes].
@@ -105,4 +103,9 @@ class Guests {
     };
     await _controller.post(ep, payloads, siteId: siteId);
   }
+}
+
+mixin GuestsMix on BaseController {
+  late Guests _guests = Guests(this);
+  Guests get guests => _guests;
 }

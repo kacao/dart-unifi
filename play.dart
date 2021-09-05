@@ -5,6 +5,13 @@ import 'dart:io';
 import 'package:dotenv/dotenv.dart' show load, env;
 import './test/utils.dart';
 
+class Core with Mixit {}
+
+mixin Mixit {
+  String _s = "mix";
+  void mov() => print(_s);
+}
+
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -24,11 +31,13 @@ Future<void> listen(unifi.Controller c) async {
 
 Future<void> close(unifi.Controller c) async {
   Future.delayed(Duration(seconds: 6), () async {
-    await c.events.close();
+    c.events.dispose();
   });
 }
 
 void main() async {
-  HttpOverrides.global = new MyHttpOverrides();
-  Map<String, String> m = {"a": "c"};
+  //HttpOverrides.global = new MyHttpOverrides();
+  //Map<String, String> m = {"a": "c"};
+  var c = Core();
+  c.mov();
 }
