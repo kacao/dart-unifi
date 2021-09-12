@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:dotenv/dotenv.dart' show load, env;
-import 'package:unifi/unifi.dart';
+import 'package:unifi/unifi.dart' as unifi;
 
-late Controller controller;
+late unifi.Controller controller;
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -23,7 +23,7 @@ void start() {
   final username = env['UNIFI_USERNAME'] ?? "";
   final password = env['UNIFI_PASSWORD'] ?? "";
   final siteId = env['UNIFI_SITE'] ?? "";
-  controller = Controller(
+  controller = unifi.Controller(
       host: host,
       port: int.parse(port),
       username: username,

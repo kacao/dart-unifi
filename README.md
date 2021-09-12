@@ -5,9 +5,11 @@ Unifi Controller API for Dart
 
 ### Usage
 ```
-import 'package:unifi/unifi.dart';
+import 'package:unifi/unifi.dart' as unifi;
+import 'package:unifi/extensions/vouchers.dart';
+import 'package:unifi/extensions/guests.dart';
 
-controller = UnifiController(host: host, port: port, username: username, password: password, siteId: siteId);
+controller = unifi.Controller(host: host, port: port, username: username, password: password, siteId: siteId);
 
 try {
     var since = await controller.vouchers.create(60);
@@ -15,10 +17,9 @@ try {
     var vouchers = await controller.vouchers.list(since);
 
     // events
-    await controller.events.connect();
-    await for (var event in controller.events.stream) {
-        print("type: ${event.type}");
-    }
-    
+    controller.stream.listen(
+        (unifi.Event event) => print(event)
+    )
+    await controller.listen();
 } 
 ```

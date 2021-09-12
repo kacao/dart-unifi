@@ -1,4 +1,4 @@
-import 'package:unifi/unifi.dart';
+import 'package:unifi/unifi.dart' as unifi;
 import 'package:unifi/extensions/vouchers.dart';
 import 'package:unifi/extensions/guests.dart';
 import 'package:test/test.dart';
