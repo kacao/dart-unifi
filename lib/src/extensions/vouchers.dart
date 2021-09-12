@@ -1,10 +1,8 @@
-part of 'package:unifi/src/controller/controller.dart';
+import 'package:unifi/src/controller.dart';
+import 'package:unifi/src/consts.dart';
+import 'package:unifi/src/utils.dart';
 
-const _epHotspot = 'api/s/%site%/cmd/hotspot';
-const _epStaVoucher = 'api/s/%site%/stat/voucher';
-
-const _cmdCreateVoucher = 'create-voucher';
-const _cmdDeleteVoucher = 'delete-voucher';
+const _extensionKey = 'vouchers';
 
 class Vouchers extends Ext {
   Vouchers(BaseController controller) : super(controller);
@@ -30,7 +28,7 @@ class Vouchers extends Ext {
       String? siteId}) async {
     var payloads = {
       'expire': minutes,
-      'cmd': _cmdCreateVoucher,
+      'cmd': Commands.createVoucher,
       'n': count,
       'quota': quota,
       'expire_number': 1,
@@ -39,7 +37,8 @@ class Vouchers extends Ext {
     if (up != null) payloads['up'] = up;
     if (down != null) payloads['down'] = down;
     if (megabytes != null) payloads['megabytes'] = megabytes;
-    final res = await _controller.post(_epHotspot, payloads, siteId: siteId);
+    final res =
+        await controller.post(Endpoints.hotspot, payloads, siteId: siteId);
     return res[0]['create_time'];
   }
 
@@ -50,7 +49,8 @@ class Vouchers extends Ext {
       {int? createTime, String? siteId}) async {
     Map<String, dynamic> payloads = {};
     if (createTime != null) payloads['create_time'] = createTime;
-    var res = await _controller.post(_epStaVoucher, payloads, siteId: siteId);
+    var res =
+        await controller.post(Endpoints.staVoucher, payloads, siteId: siteId);
     //return List<Voucher>.from(res.map((e) => Voucher.fromJson(e)));
     return toList(res);
   }
@@ -60,12 +60,14 @@ class Vouchers extends Ext {
   /// Throw [ApiException] if not successful
   ///
   Future<void> revoke(String id, {String? siteId}) async {
-    var payloads = {'_id': id, 'cmd': _cmdDeleteVoucher};
-    await _controller.post(_epHotspot, payloads, siteId: siteId);
+    var payloads = {'_id': id, 'cmd': Commands.deleteVoucher};
+    await controller.post(Endpoints.hotspot, payloads, siteId: siteId);
   }
+
+  void dispose() {}
 }
 
-mixin VouchersMix on BaseController {
-  late Vouchers _vouchers = Vouchers(this);
-  Vouchers get vouchers => _vouchers;
+extension VouchersExtension on Controller {
+  Vouchers get vouchers =>
+      this.use(_extensionKey, () => Vouchers(this)) as Vouchers;
 }

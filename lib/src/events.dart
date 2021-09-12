@@ -1,4 +1,4 @@
-part of 'package:unifi/src/controller/controller.dart';
+part of 'package:unifi/src/controller.dart';
 
 enum EventType {
   authenticated,
@@ -20,40 +20,37 @@ Map<int, ReadyState> _readyStateMap = {
   3: ReadyState.closed
 };
 
-class Events extends Ext {
-  StreamController _sink = new StreamController.broadcast();
+class Events {
   bool _closing = false;
   int reconnectDelay = 5;
   WebSocket? _ws = null;
   late String _url;
-  Stream<dynamic> get stream => _sink.stream;
+  Stream<dynamic> get stream => _controller._sink.stream;
   ReadyState? get readyState => _readyStateMap[_ws?.readyState ?? 3];
-  late Controller controller;
-  Events(BaseController controller) : super(controller) {
-    this.controller = (controller as Controller);
-    _url = addSiteId(this.controller._urlWs.toString(), this.controller.siteId);
+  late Controller _controller;
+  Events(this._controller) {
+    _url = addSiteId(_controller._urlWs.toString(), _controller.siteId);
   }
 
   Future<void> connect() async {
-    var controller = this.controller;
-    _sink.add(Event(EventType.connecting));
-    if (controller.authenticated) {
-      await controller.login();
+    _add(Event(EventType.connecting));
+    if (_controller.authenticated) {
+      await _controller.login();
     }
-    _ws = await controller._client
+    _ws = await _controller._client
         .createWebSocket(_url.toString(), _controller.getHeaders());
     await _ws?.listen(_onData, onDone: _onDone, onError: _onError);
-    _sink.add(Event(EventType.connected));
+    _add(Event(EventType.connected));
   }
 
   Future<void> _onData(dynamic message) async {
-    _sink.add(Event(EventType.data, data: message));
+    _add(Event(EventType.data, data: message));
   }
 
   Future<void> _onDone() async {
     if (!_closing) {
-      _sink.add(Event(EventType.disconnected));
-      _sink.add(Event(EventType.reconnecting, data: reconnectDelay));
+      _add(Event(EventType.disconnected));
+      _add(Event(EventType.reconnecting, data: reconnectDelay));
       await Future.delayed(Duration(seconds: reconnectDelay));
       await connect();
     }
@@ -61,28 +58,21 @@ class Events extends Ext {
 
   Future<void> _onError(Object error) async {
     print(error);
-    _sink.add(Event(EventType.error, data: error));
+    _add(Event(EventType.error, data: error));
     if (!_closing) {
-      _sink.add(Event(EventType.reconnecting, data: reconnectDelay));
+      _add(Event(EventType.reconnecting, data: reconnectDelay));
     }
   }
 
   void _add(Event event) {
-    if (!_sink.isClosed) _sink.add(event);
+    if (!_controller._sink.isClosed) _controller._sink.add(event);
   }
 
   void dispose() {
-    _sink.add(Event(EventType.closing));
+    _add(Event(EventType.closing));
     _closing = true;
     _ws?.close();
-    _sink.close();
   }
-}
-
-mixin EventsMix on BaseController {
-  late Events _events = Events(this);
-  Events get events => _events;
-  Stream get stream => _events.stream;
 }
 
 class Event {

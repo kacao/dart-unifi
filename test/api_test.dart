@@ -1,4 +1,6 @@
-import '../lib/unifi.dart';
+import 'package:unifi/unifi.dart';
+import 'package:unifi/extensions/vouchers.dart';
+import 'package:unifi/extensions/guests.dart';
 import 'package:test/test.dart';
 import 'utils.dart';
 
@@ -15,7 +17,7 @@ void main() {
   });
   group('vouchers', () {
     test('create/list/revoke', () async {
-      int since = await controller.vouchers.create(24);
+      int since = await controller.vouchers.create(1440);
       expect(since, greaterThan(0));
       List<Map<String, dynamic>> vouchers = await controller.vouchers.list();
       expect(vouchers.length, greaterThan(0));

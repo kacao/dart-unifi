@@ -1,1 +1,1 @@
-export './src/controller/controller.dart';
+export 'package:unifi/src/controller.dart';

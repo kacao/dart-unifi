@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:dotenv/dotenv.dart' show load, env;
-import '../lib/unifi.dart';
+import 'package:unifi/unifi.dart';
 
 late Controller controller;
 

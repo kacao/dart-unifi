@@ -6,15 +6,13 @@ import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' show IOClient;
 import 'package:rxdart/rxdart.dart';
-import '../utils.dart';
+import 'package:unifi/src/utils.dart';
 
 //import 'package:logging/logging.dart';
-part 'package:unifi/src/controller/ext.dart';
-part 'package:unifi/src/controller/http.dart';
-part 'package:unifi/src/controller/exceptions.dart';
-part 'package:unifi/src/controller/mixes/vouchers.dart';
-part 'package:unifi/src/controller/mixes/guests.dart';
-part 'package:unifi/src/controller/mixes/events.dart';
+part 'package:unifi/src/ext.dart';
+part 'package:unifi/src/http.dart';
+part 'package:unifi/src/exceptions.dart';
+part 'package:unifi/src/events.dart';
 
 const siteDefault = 'default';
 
@@ -30,16 +28,23 @@ const _epLogin = 'api/auth/login';
 const _epLogout = 'api/auth/logout';
 const _epWebsocket = 'wss/s/%site%/events';
 
-class Controller extends BaseController with GuestsMix, VouchersMix, EventsMix {
-  final String host, username, password, siteId;
+class Controller extends BaseController {
   final int port;
+  final String host, username, password, siteId;
   late Uri _url, _urlLogin, _urlLogout, _urlWs;
-  String _csrfToken = '';
+
   bool _authenticated = false;
 
-  final Client _client = Client();
-  Map<String, String> _headers = Map<String, String>.from(defaultHeaders);
   Cookie jar = Cookie("", "");
+  Map<String, String> _headers = Map<String, String>.from(defaultHeaders);
+  String _csrfToken = '';
+
+  final Client _client = Client();
+  Map<String, Ext> _extensions = {};
+
+  late Events _events;
+  StreamController _sink = new StreamController.broadcast();
+  Stream get stream => _sink.stream;
 
   get authenticated => _authenticated;
 
@@ -54,6 +59,7 @@ class Controller extends BaseController with GuestsMix, VouchersMix, EventsMix {
         Uri.parse("wss://$host:$port").resolve(_epBase).resolve(_epWebsocket);
     _urlLogin = _url.resolve(_epLogin);
     _urlLogout = _url.resolve(_epLogout);
+    _events = Events(this);
 
     //log.level = Level.ALL;
     //log.onRecord.listen((record) {
@@ -96,20 +102,20 @@ class Controller extends BaseController with GuestsMix, VouchersMix, EventsMix {
       endpoint = endpoint.replaceAll('%site%', sid);
       url = _url.resolve(path.join(_epBase, endpoint));
     }
+
     final Map<String, String> headers = getHeaders();
     var res = await _client.fetch(url,
         method: method, headers: headers, payloads: payloads);
 
     if ((res.statusCode == HttpStatus.forbidden) && (authenticate)) {
-      if (await login()) {
+      if (await login())
         return fetch(endpoint,
             method: method,
             payloads: payloads,
             siteId: siteId,
             authenticate: false);
-      } else {
+      else
         throw InvalidCredentials("Invalid login");
-      }
     }
 
     if (res.statusCode == HttpStatus.ok) {
@@ -120,7 +126,7 @@ class Controller extends BaseController with GuestsMix, VouchersMix, EventsMix {
     var msg = '';
     try {
       msg = jsonDecode(res.body).toString();
-    } on Exception {
+    } catch (_) {
       msg = res.body;
     }
     throw ApiException(res.statusCode, msg);
@@ -128,17 +134,15 @@ class Controller extends BaseController with GuestsMix, VouchersMix, EventsMix {
 
   Future<bool> login() async {
     var res = await _client.get(_url);
-    this._csrfToken = res.headers['x-csrf-token'] ?? "";
-    final Map<String, String> payloads = {
-      'username': username,
-      'password': password
-    };
+    Map<String, String> payloads = {'username': username, 'password': password};
     final headers = getHeaders();
+
+    this._csrfToken = res.headers['x-csrf-token'] ?? "";
     res = await _client.post(_urlLogin, headers: headers, payloads: payloads);
     _collectHeaders(res.headers);
     if (res.statusCode == HttpStatus.ok) {
       _authenticated = true;
-      events._add(Event(EventType.authenticated));
+      _events._add(Event(EventType.authenticated));
       return true;
     }
     return false;
@@ -151,7 +155,7 @@ class Controller extends BaseController with GuestsMix, VouchersMix, EventsMix {
       jar = Cookie("", "");
       _csrfToken = "";
       _authenticated = false;
-      events._add(Event(EventType.unauthenticated));
+      _events._add(Event(EventType.unauthenticated));
       return true;
     }
     return false;
@@ -159,11 +163,11 @@ class Controller extends BaseController with GuestsMix, VouchersMix, EventsMix {
 
   @override
   Map<String, String> getHeaders() {
-    Map<String, String> addons = {
-      'Cookie': jar.toString(),
-      "x-csrf-token": _csrfToken
+    return {
+      ..._headers,
+      ...{'Cookie': jar.toString()},
+      if (_csrfToken.isNotEmpty) ...{"x-csrf-token": _csrfToken}
     };
-    return mergeMaps(_headers, addons);
   }
 
   ///
@@ -178,7 +182,19 @@ class Controller extends BaseController with GuestsMix, VouchersMix, EventsMix {
 
   void dispose() {
     _events.dispose();
+    _extensions.values.forEach((element) {
+      element.dispose();
+    });
     logout();
+  }
+
+  Ext use(String key, Ext Function() ext) {
+    return _extensions.putIfAbsent(key, ext);
+  }
+
+  // events
+  Future<void> listen() async {
+    return _events.connect();
   }
 }
 
