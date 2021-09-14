@@ -70,7 +70,7 @@ class Controller extends BaseController {
   factory Controller.fromMap(Map<String, dynamic> map) {
     return Controller(
         host: map['host'],
-        port: map['port'],
+        port: map['port'] ?? 443,
         username: map['username'],
         password: map['password']);
   }

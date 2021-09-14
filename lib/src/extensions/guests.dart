@@ -39,7 +39,7 @@ class Guests extends Ext {
   /// Throw [ApiException] if not successful
   ///
   Future<void> unauthorize(String mac, {String? siteId}) async {
-    await _postWithMac(Endpoints.staMgr, Commands.unauthorize, mac,
+    await _commandWithMac(Endpoints.staMgr, Commands.unauthorize, mac,
         siteId: siteId);
   }
 
@@ -49,7 +49,7 @@ class Guests extends Ext {
   /// Throw [ApiException] if not successful
   ///
   Future<void> kick(String mac, {String? siteId}) async {
-    await _postWithMac(Endpoints.staMgr, Commands.kick, mac, siteId: siteId);
+    await _commandWithMac(Endpoints.staMgr, Commands.kick, mac, siteId: siteId);
   }
 
   ///
@@ -58,7 +58,8 @@ class Guests extends Ext {
   /// Throw [ApiException] if not successful
   ///
   Future<void> block(String mac, {String? siteId}) async {
-    await _postWithMac(Endpoints.staMgr, Commands.block, mac, siteId: siteId);
+    await _commandWithMac(Endpoints.staMgr, Commands.block, mac,
+        siteId: siteId);
   }
 
   ///
@@ -67,7 +68,8 @@ class Guests extends Ext {
   /// Throw [ApiException] if not successful
   ///
   Future<void> unblock(String mac, {String? siteId}) async {
-    await _postWithMac(Endpoints.staMgr, Commands.unblock, mac, siteId: siteId);
+    await _commandWithMac(Endpoints.staMgr, Commands.unblock, mac,
+        siteId: siteId);
   }
 
   ///
@@ -76,7 +78,8 @@ class Guests extends Ext {
   /// Throw [ApiException] if not successful
   ///
   Future<void> forget(String mac, {String? siteId}) async {
-    await _postWithMac(Endpoints.staMgr, Commands.unblock, mac, siteId: siteId);
+    await _commandWithMac(Endpoints.staMgr, Commands.unblock, mac,
+        siteId: siteId);
   }
 
   ///
@@ -100,7 +103,7 @@ class Guests extends Ext {
         .post(Endpoints.hotspot, {'id': id, 'cmd': Commands.extend});
   }
 
-  Future<void> _postWithMac(String ep, String cmd, String mac,
+  Future<void> _commandWithMac(String ep, String cmd, String mac,
       {String? siteId}) async {
     var payloads = {
       'mac': mac,
@@ -115,8 +118,3 @@ class Guests extends Ext {
 extension GuestsExtension on Controller {
   Guests get guests => this.use(_extensionKey, () => Guests(this)) as Guests;
 }
-
-/*mixin GuestsMix on BaseController {
-  late Guests _guests = Guests(this);
-  Guests get guests => _guests;
-}*/

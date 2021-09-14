@@ -39,4 +39,9 @@ void main() {
       await controller.guests.unauthorize(mac);
     });
   });
+
+  test('controller resilience', () async {
+    unifi.Controller.fromMap(
+        {'host': '127.0.0.1', 'username': '', 'password': ''});
+  });
 }
