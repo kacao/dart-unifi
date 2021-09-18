@@ -5,7 +5,7 @@ import 'package:unifi/src/utils.dart';
 const _extensionKey = 'vouchers';
 
 class Vouchers extends Ext {
-  Vouchers(BaseController controller) : super(controller);
+  Vouchers(Controller controller) : super(controller);
 
   ///
   /// [minutes]: number of valid minutes after activation

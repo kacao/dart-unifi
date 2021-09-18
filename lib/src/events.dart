@@ -20,23 +20,24 @@ Map<int, ReadyState> _readyStateMap = {
   3: ReadyState.closed
 };
 
-class Events {
+class _Events {
   bool _closing = false;
   int reconnectDelay = 5;
   WebSocket? _ws = null;
-  late String _url;
+  String _url;
   Stream<dynamic> get stream => _controller._sink.stream;
   ReadyState? get readyState => _readyStateMap[_ws?.readyState ?? 3];
   late Controller _controller;
-  Events(this._controller) {
-    _url = addSiteId(_controller._urlWs.toString(), _controller.siteId);
-  }
+  _Events(this._controller)
+      : _url = Endpoints.formatSiteId(
+            _controller._urlWs.toString(), _controller.siteId);
 
-  Future<void> connect() async {
+  Future<void> listen() async {
     _add(Event(EventType.connecting));
     if (_controller.authenticated) {
       await _controller.login();
     }
+    print('creating websocket: ${_url}');
     _ws = await _controller._client
         .createWebSocket(_url.toString(), _controller.getHeaders());
     await _ws?.listen(_onData, onDone: _onDone, onError: _onError);
@@ -52,7 +53,7 @@ class Events {
       _add(Event(EventType.disconnected));
       _add(Event(EventType.reconnecting, data: reconnectDelay));
       await Future.delayed(Duration(seconds: reconnectDelay));
-      await connect();
+      await listen();
     }
   }
 

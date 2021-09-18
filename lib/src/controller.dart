@@ -5,10 +5,9 @@ import 'dart:core';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' show IOClient;
-import 'package:rxdart/rxdart.dart';
-import 'package:unifi/src/utils.dart';
 
 //import 'package:logging/logging.dart';
+import 'package:unifi/src/consts.dart';
 part 'package:unifi/src/ext.dart';
 part 'package:unifi/src/http.dart';
 part 'package:unifi/src/exceptions.dart';
@@ -22,13 +21,7 @@ Map<String, String> defaultHeaders = {
   'Accept': 'application/json'
 };
 
-// endpoints
-const _epBase = 'proxy/network/';
-const _epLogin = 'api/auth/login';
-const _epLogout = 'api/auth/logout';
-const _epWebsocket = 'wss/s/%site%/events';
-
-class Controller extends BaseController {
+class Controller {
   final int port;
   final String host, username, password, siteId;
   late Uri _url, _urlLogin, _urlLogout, _urlWs;
@@ -42,7 +35,7 @@ class Controller extends BaseController {
   final Client _client = Client();
   Map<String, Ext> _extensions = {};
 
-  late Events _events;
+  late _Events _events;
   StreamController _sink = new StreamController.broadcast();
   Stream get stream => _sink.stream;
 
@@ -55,11 +48,12 @@ class Controller extends BaseController {
       required this.password,
       this.siteId: siteDefault}) {
     _url = Uri.https('$host:$port', "");
-    _urlWs =
-        Uri.parse("wss://$host:$port").resolve(_epBase).resolve(_epWebsocket);
-    _urlLogin = _url.resolve(_epLogin);
-    _urlLogout = _url.resolve(_epLogout);
-    _events = Events(this);
+    _urlWs = Uri.parse("wss://$host:$port")
+        .resolve(Endpoints.base)
+        .resolve(Endpoints.websocket);
+    _urlLogin = _url.resolve(Endpoints.login);
+    _urlLogout = _url.resolve(Endpoints.logout);
+    _events = _Events(this);
 
     //log.level = Level.ALL;
     //log.onRecord.listen((record) {
@@ -75,7 +69,6 @@ class Controller extends BaseController {
         password: map['password']);
   }
 
-  @override
   Future<dynamic> post(String endpoint, Map<String, dynamic> payloads,
       {String? siteId, bool authenticate: true}) async {
     return await fetch(endpoint,
@@ -85,7 +78,6 @@ class Controller extends BaseController {
         authenticate: authenticate);
   }
 
-  @override
   Future<dynamic> fetch(String endpoint,
       {Method method: Method.get,
       Map<String, dynamic>? payloads,
@@ -99,9 +91,10 @@ class Controller extends BaseController {
       url = _url.resolve(endpoint);
     } else {
       sid = siteId ?? this.siteId;
-      endpoint = endpoint.replaceAll('%site%', sid);
-      url = _url.resolve(path.join(_epBase, endpoint));
+      endpoint = Endpoints.formatSiteId(endpoint, sid);
+      url = _url.resolve(path.join(Endpoints.base, endpoint));
     }
+    //print("fetching ${url}");
 
     final Map<String, String> headers = getHeaders();
     var res = await _client.fetch(url,
@@ -161,7 +154,6 @@ class Controller extends BaseController {
     return false;
   }
 
-  @override
   Map<String, String> getHeaders() {
     return {
       ..._headers,
@@ -192,20 +184,7 @@ class Controller extends BaseController {
     return _extensions.putIfAbsent(key, ext);
   }
 
-  // events
-  Future<void> listen() async {
-    return _events.connect();
+  Future<void> websocketConnect() async {
+    return await _events.listen();
   }
-}
-
-abstract class BaseController {
-  Future<dynamic> post(String endpoint, Map<String, dynamic> payloads,
-      {String? siteId, bool authenticate: true});
-
-  Future<dynamic> fetch(String endpoint,
-      {Method method: Method.get,
-      Map<String, dynamic>? payloads,
-      String? siteId,
-      bool authenticate: true});
-  Map<String, String> getHeaders();
 }

@@ -1,5 +1,6 @@
 import 'package:test/test.dart';
 import './utils.dart';
+import 'package:unifi/extensions/vouchers.dart';
 
 Future<void> main() async {
   setUp(() async {
@@ -9,6 +10,9 @@ Future<void> main() async {
     await end();
   });
   group('events', () {
-    test('connect', () async {});
+    test('connect', () async {
+      await controller.websocketConnect();
+      await controller.vouchers.list();
+    });
   });
 }

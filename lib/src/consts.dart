@@ -1,9 +1,18 @@
 class Endpoints {
-  static final hotspot = 'api/s/%site%/cmd/hotspot';
-  static final staVoucher = 'api/s/%site%/stat/voucher';
+// endpoints
+  static final base = 'proxy/network/';
+  static final login = 'api/auth/login';
+  static final logout = 'api/auth/logout';
+  static final websocket = 'wss/s/_site_/events';
 
-  static final staMgr = 'api/s/%site%/cmd/stamgr';
-  static final statGuest = 'api/s/%site%/stat/guest';
+  static final hotspot = 'api/s/_site_/cmd/hotspot';
+  static final staVoucher = 'api/s/_site_/stat/voucher';
+
+  static final staMgr = 'api/s/_site_/cmd/stamgr';
+  static final statGuest = 'api/s/_site_/stat/guest';
+
+  static String formatSiteId(String url, String siteId) =>
+      url.replaceAll("_site_", siteId);
 }
 
 class Commands {

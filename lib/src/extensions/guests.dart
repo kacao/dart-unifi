@@ -5,7 +5,7 @@ import 'package:unifi/src/utils.dart';
 const _extensionKey = "guests";
 
 class Guests extends Ext {
-  Guests(BaseController controller) : super(controller);
+  Guests(Controller controller) : super(controller);
 
   ///
   /// Authorize a [mac] for [minutes].
