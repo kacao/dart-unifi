@@ -53,7 +53,7 @@ class WebSocketSession extends Session {
     print('creating websocket: ${url.websocket}');
 
     _channel =
-        IOWebSocketChannel.connect(this.url.websocket, headers: this.headers);
+        IOWebSocketChannel.connect(this.url.webSocket, headers: this.headers);
     await _channel.stream.listen(_onData, onDone: _onDone, onError: _onError);
 
     _add(EventType.connected);
