@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import 'utils.dart';
 
 void main() {
-/*  setUp(() async {
+  setUp(() async {
     start();
   });
   tearDown(() async {
@@ -44,5 +44,4 @@ void main() {
     unifi.Controller.fromMap(
         {'host': '127.0.0.1', 'username': '', 'password': ''});
   });
-*/
 }

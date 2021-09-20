@@ -1,5 +1,3 @@
-part of 'controller.dart';
-
 class RequestException implements Exception {
   final String message;
   RequestException(this.message);

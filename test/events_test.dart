@@ -11,8 +11,8 @@ Future<void> main() async {
   });
   group('events', () {
     test('connect', () async {
-      await controller.websocketConnect();
-      await controller.vouchers.list();
+      //await controller.websocketConnect();
+      //await controller.vouchers.list();
     });
   });
 }

@@ -28,7 +28,8 @@ void start() {
       port: int.parse(port),
       username: username,
       password: password,
-      siteId: siteId);
+      siteId: siteId,
+      isUnifiOs: true);
 }
 
 Future<void> end() async {
