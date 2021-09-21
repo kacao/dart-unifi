@@ -1,7 +1,10 @@
 # unifi
 Unifi Controller API for Dart
+(Work in process)
 
 ### Installation
+
+```pub add unifi```
 
 ### Usage
 ```
