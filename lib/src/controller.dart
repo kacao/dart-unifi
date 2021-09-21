@@ -83,6 +83,7 @@ class Controller {
   }
 
   Future<void> subscribe() async {
+    print('start subscribing');
     await _webSocketSession.listen();
   }
 
