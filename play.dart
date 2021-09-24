@@ -4,10 +4,15 @@
 //import 'dart:io';
 //import 'package:dotenv/dotenv.dart' show load, env;
 //import './test/utils.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:unifi/unifi.dart' as unifi;
+import 'test/helpers.dart';
 
 void main() async {
   //HttpOverrides.global = new MyHttpOverrides();
   //Map<String, String> m = {"a": "c"};
-  IOWebSocketChannel.connect();
+  start();
+
+  controller.login();
+  controller.subscribe(onData: (event) => print(event.data));
+  end();
 }

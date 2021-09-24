@@ -22,15 +22,13 @@ class Url {
       required this.siteId,
       required this.isUnifiOs})
       : _baseUrl = Uri.https('$host:$port', ""),
-        _urlWebsocket = Uri.parse("wss://$host:$port")
-            .resolve(isUnifiOs ? Endpoints.base : "")
-            .resolve(Endpoints.websocket) {
+        _urlWebsocket = Uri.parse("wss://$host:$port") {
     if (isUnifiOs) {
       _urlLogin = _baseUrl.resolve('api/auth/' + Endpoints.login);
       _urlLogout = _baseUrl.resolve('api/auth/' + Endpoints.logout);
     } else {
-      _urlLogin = _baseUrl.resolve('api/' + Endpoints.login);
-      _urlLogout = _baseUrl.resolve(Endpoints.logout);
+      _urlLogin = _baseUrl.resolve("api/${Endpoints.login}");
+      _urlLogout = _baseUrl.resolve("api/${Endpoints.logout}");
     }
   }
 
@@ -40,7 +38,10 @@ class Url {
     if (endpoint.contains("logout")) return _urlLogout;
 
     endpoint = Endpoints.formatSiteId(endpoint, withSiteId ?? siteId);
-    return _baseUrl
-        .resolve(path.join(isUnifiOs ? Endpoints.base : "", endpoint));
+    return endpoint.contains('wss')
+        ? _urlWebsocket
+            .resolve(path.join(isUnifiOs ? Endpoints.base : "", endpoint))
+        : _baseUrl
+            .resolve(path.join(isUnifiOs ? Endpoints.base : "", endpoint));
   }
 }

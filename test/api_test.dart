@@ -2,28 +2,26 @@ import 'package:unifi/unifi.dart' as unifi;
 import 'package:unifi/extensions/vouchers.dart';
 import 'package:unifi/extensions/guests.dart';
 import 'package:test/test.dart';
-import 'utils.dart';
+import 'helpers.dart';
 
 void main() {
   setUp(() async {
-    start();
+    await start();
   });
   tearDown(() async {
     await end();
   });
   test("auth", () async {
     expect(await controller.login(), equals(true));
-    //expect(await controller.logout(), equals(true));
+    expect(await controller.logout(), equals(true));
   });
-  group('vouchers', () {
-    test('create/list/revoke', () async {
-      int since = await controller.vouchers.create(1440);
-      expect(since, greaterThan(0));
-      List<Map<String, dynamic>> vouchers = await controller.vouchers.list();
-      expect(vouchers.length, greaterThan(0));
-      vouchers.forEach((element) async {
-        await controller.vouchers.revoke(element["_id"]);
-      });
+  test('vouchers', () async {
+    int since = await controller.vouchers.create(1440);
+    expect(since, greaterThan(0));
+    List<Map<String, dynamic>> vouchers = await controller.vouchers.list();
+    expect(vouchers.length, greaterThan(0));
+    vouchers.forEach((element) async {
+      await controller.vouchers.revoke(element["_id"]);
     });
   });
   group('guests', () {

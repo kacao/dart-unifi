@@ -4,7 +4,7 @@ class Endpoints {
   static final base = 'proxy/network/';
   static final login = 'login';
   static final logout = 'logout';
-  static final websocket = 'wss/s/_site_/events';
+  static final webSocket = 'wss/s/_site_/events';
 
   static final hotspot = 'api/s/_site_/cmd/hotspot';
   static final staVoucher = 'api/s/_site_/stat/voucher';

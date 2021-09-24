@@ -21,7 +21,7 @@ class Controller {
       required String username,
       required String password,
       String siteId: 'default',
-      isUnifiOs = true})
+      required bool isUnifiOs})
       : _session = Session(
             host: host,
             port: port,
@@ -82,9 +82,13 @@ class Controller {
     return await _session.logout();
   }
 
-  Future<void> subscribe() async {
+  Future<void> subscribe(
+      {void Function(Event event)? onData,
+      Function? onError,
+      void onDone()?}) async {
     print('start subscribing');
-    await _webSocketSession.listen();
+    await _webSocketSession.listen(
+        onData: onData, onError: onError, onDone: onDone);
   }
 
   void dispose() {
@@ -96,6 +100,11 @@ class Controller {
 
   Ext use(String key, Ext Function() ext) {
     return _extensions.putIfAbsent(key, ext);
+  }
+
+  static Future<bool> isUnifiOs(
+      {required String host, required String port}) async {
+    return await Session.isUnifiOS(host: host, port: port);
   }
 }
 

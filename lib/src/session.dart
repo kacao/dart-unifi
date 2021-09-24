@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -12,6 +13,8 @@ import 'package:unifi/src/errors.dart';
 
 enum Method { post, get }
 
+const _csrfHeaderKey = "x-csrf-token";
+
 const _defaultHeaders = <String, String>{
   'Content-Type': 'application/json',
   'Connection': 'keep-alive',
@@ -21,12 +24,13 @@ const _defaultHeaders = <String, String>{
 class Session {
   var _cookies = Cookies();
   var _headers = {..._defaultHeaders};
+  final bool isUnifiOs;
 
-  final Url _url;
+  late Url _url;
   final String _username;
   final String _password;
 
-  get headers => _headers;
+  get headers => _getHeaders();
   get url => _url;
 
   Session(
@@ -35,11 +39,11 @@ class Session {
       required String username,
       required String password,
       required String siteId,
-      required bool isUnifiOs})
-      : _url =
-            Url(host: host, port: port, isUnifiOs: isUnifiOs, siteId: siteId),
-        _username = username,
-        _password = password;
+      required this.isUnifiOs})
+      : _username = username,
+        _password = password,
+        _url =
+            Url(host: host, port: port, siteId: siteId, isUnifiOs: isUnifiOs);
 
   factory Session.fromMap(Map<String, dynamic> map, {bool isUnifiOs = true}) {
     return Session(
@@ -48,7 +52,7 @@ class Session {
         username: map['username'],
         password: map['password'],
         siteId: map['siteId'],
-        isUnifiOs: isUnifiOs);
+        isUnifiOs: map['isUnifiOs']);
   }
 
   Future<bool> login() async {
@@ -88,10 +92,12 @@ class Session {
     http.Response res;
     switch (method) {
       case Method.post:
+        //print("fetching ${fullUrl}");
         res = await http.post(fullUrl, headers: _getHeaders(), body: body);
         break;
       default:
         fullUrl = fullUrl.replace(queryParameters: payloads);
+        //print("fetching ${fullUrl}");
         res = await http.get(
           fullUrl,
           headers: _getHeaders(),
@@ -158,8 +164,14 @@ class Session {
       };
 
   void _collectHeaders(Map<String, String> headers) {
-    if (headers.containsKey('x-csrf-token'))
-      _headers["x-csrf-token"] = headers['x-csrf-token']!;
+    if (headers.containsKey(_csrfHeaderKey))
+      _headers[_csrfHeaderKey] = headers[_csrfHeaderKey]!;
     _cookies.collect(headers);
+  }
+
+  static Future<bool> isUnifiOS(
+      {required String host, required String port}) async {
+    var res = await http.get(Uri.https('$host:$port', ""));
+    return res.headers.containsKey(_csrfHeaderKey);
   }
 }

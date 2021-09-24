@@ -22,7 +22,7 @@ void main() {
           isUnifiOs: false, host: 'localhost', port: 443, siteId: 'default');
 
       expect(url.login.toString(), equals("https://localhost/api/login"));
-      expect(url.logout.toString(), equals("https://localhost/logout"));
+      expect(url.logout.toString(), equals("https://localhost/api/logout"));
       expect(url.resolve(Endpoints.staVoucher).toString(),
           equals("https://localhost/api/s/default/stat/voucher"));
     });

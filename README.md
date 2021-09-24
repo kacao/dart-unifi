@@ -12,7 +12,8 @@ import 'package:unifi/unifi.dart' as unifi;
 import 'package:unifi/extensions/vouchers.dart';
 import 'package:unifi/extensions/guests.dart';
 
-controller = unifi.Controller(host: host, port: port, username: username, password: password, siteId: siteId);
+var isUnifiOs = unifi.Controller.isUnifiOs(host: host, port: port);
+controller = unifi.Controller(host: host, port: port, username: username, password: password, siteId: siteId, isUnifiOs: isUnifiOs);
 
 try {
     var since = await controller.vouchers.create(60);
@@ -20,9 +21,8 @@ try {
     var vouchers = await controller.vouchers.list(since);
 
     // events
-    controller.stream.listen(
+    controller.subscribe(
         (unifi.Event event) => print(event)
     )
-    await controller.listen();
 } 
 ```

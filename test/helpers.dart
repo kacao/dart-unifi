@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dotenv/dotenv.dart' show load, env;
 import 'package:unifi/unifi.dart' as unifi;
+import 'package:unifi/src/url.dart';
 
 late unifi.Controller controller;
 
@@ -14,8 +15,9 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-void start() {
+Future<void> start() async {
   HttpOverrides.global = new MyHttpOverrides();
+
   String envFile = "../env/.env.test.local." + (env["SITE"] ?? "");
   load(envFile);
   final host = env['UNIFI_HOST'] ?? "";
@@ -23,13 +25,14 @@ void start() {
   final username = env['UNIFI_USERNAME'] ?? "";
   final password = env['UNIFI_PASSWORD'] ?? "";
   final siteId = env['UNIFI_SITE'] ?? "";
+  var isUnifiOs = await unifi.Controller.isUnifiOs(host: host, port: port);
   controller = unifi.Controller(
       host: host,
       port: int.parse(port),
       username: username,
       password: password,
       siteId: siteId,
-      isUnifiOs: true);
+      isUnifiOs: isUnifiOs);
 }
 
 Future<void> end() async {
