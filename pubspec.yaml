@@ -10,8 +10,6 @@ dependencies:
   logging: ^1.0.1
   path: ^1.8.0
   json_annotation: ^4.0.0
-  equatable: ^2.0.3
-  rxdart: ^0.27.2
   web_socket_channel: ^2.1.0
 dev_dependencies: 
   dotenv: ^3.0.0-nullsafety.0

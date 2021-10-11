@@ -13,6 +13,7 @@ import 'package:unifi/extensions/vouchers.dart';
 import 'package:unifi/extensions/guests.dart';
 
 var isUnifiOs = await unifi.Controller.isUnifiOs(host: host, port: port);
+
 controller = unifi.Controller(host: host, port: port, username: username, password: password, siteId: siteId, isUnifiOs: isUnifiOs);
 
 try {
